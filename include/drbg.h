@@ -23,15 +23,11 @@ DRBG* create_DRBG(const char* name);
 /* Destroy the given DRBG */
 int destroy_DRBG(DRBG* generator);
 
-/* If a seed isn't created yet, generate one.
- * If it is, just delegate to get_seed(DRBG*, int)
+/* Generate a seed of size n_bytes
+ * If a parent EVP_RAND was used, generate a seed (bytes) using it
+ * If not, call getentropy() :-(
  */
 int generate_seed(DRBG* generator, byte output[], int n_bytes);
-
-/* Return the generated seed. 
- * TODO: what do I return if a seed isn't generated yet?
- */
-byte* get_seed(DRBG* generator, int n_bytes);
 
 /* Reseed the DRBG with a given seed
  * Passing seed = NULL will force reseeding using the
