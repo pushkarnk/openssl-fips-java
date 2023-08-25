@@ -2,7 +2,7 @@
 #include <drbg.h>
 
 void test_xxx_drbg(const char *test, const char *algo) {
-    DRBG *drbg = create_DRBG(algo);
+    DRBG *drbg = create_DRBG(algo, NULL);
     byte output1[10] = {0}, output2[10] = {0};
     next_rand(drbg, output1, 10);
     next_rand(drbg, output2, 10);
@@ -28,7 +28,7 @@ void test_basic_ctr_drbg() {
 }
 
 void test_xxx_drbg_fails(const char *test, const char *algo) {
-    if (NULL == create_DRBG(algo)) {
+    if (NULL == create_DRBG(algo, NULL)) {
         printf("drbg_test/%s: PASS\n", test);
     } else {
         printf("drbg_test/%s: FAIL\n", test);
@@ -43,6 +43,15 @@ void test_test_rand_drbg_fails() {
    test_xxx_drbg_fails("test_test_rand_drbg_fails", "TEST-RAND");
 }
 
+void test_rand_int_num_bits(const char *algo, int num_bits) {
+    DRBG *drbg;
+    if (NULL == (drbg = create_DRBG(algo, NULL))) {
+        printf("drbg_test/test_rand_int_num_bits: FAIL\n");
+    } else {
+        printf("next_rand_int(%d) = %x (PASS)\n", num_bits, next_rand_int(drbg, num_bits));
+    }
+}
+
 int main(int argc, char ** argv) {
     load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
     test_basic_hmac_drbg();
@@ -50,6 +59,9 @@ int main(int argc, char ** argv) {
     test_basic_ctr_drbg();
     test_seed_src_drbg_fails();
     test_test_rand_drbg_fails();
+    test_rand_int_num_bits("CTR-DRBG", 1);
+    test_rand_int_num_bits("HMAC-DRBG", 16);
+    test_rand_int_num_bits("HASH-DRBG", 30);
+    test_rand_int_num_bits("HASH-DRBG", 32);
     return 0;
 }
- 

@@ -1,4 +1,6 @@
 #include <drbg.h>
+#include <stdio.h>
+#include <unistd.h>
 
 /* Created the necessary params for the given algorithm 
  * Return the number of parameters added to `params`
@@ -30,15 +32,18 @@ static int create_params(const char *name, OSSL_PARAM params[]) {
         return 0;
     }
 }
+DRBG* create_DRBG(const char* name, DRBG* parent) {
+    return create_DRBG_with_params(name, parent, NULL);
+}
 
-DRBG* create_DRBG(const char* name) {
+DRBG* create_DRBG_with_params(const char* name, DRBG* parent, DRBGParams *drbg_params) {
     EVP_RAND *rand = EVP_RAND_fetch(NULL, name, NULL);
     if (NULL == rand) {
         fprintf(stderr, "Couldn't allocate EVP_RAND\n");
         return NULL;
     }
     
-    EVP_RAND_CTX * context = EVP_RAND_CTX_new(rand, NULL);
+    EVP_RAND_CTX * context = EVP_RAND_CTX_new(rand, parent == NULL ? NULL : parent->context);
     EVP_RAND_free(rand);
     if (NULL == context) {
         fprintf(stderr, "Couldn't allocate EVP_RAND_CTX\n");
@@ -52,15 +57,70 @@ DRBG* create_DRBG(const char* name) {
          return NULL;
     }
 
-    EVP_RAND_instantiate(context, 128, 0, NULL, 0, params);
+    if (NULL == drbg_params) {
+        EVP_RAND_instantiate(context, 128, 0, NULL, 0, params);
+    } else {
+        EVP_RAND_instantiate(context, drbg_params->strength,
+                             drbg_params->prediction_resistance,
+                             drbg_params->personalization_str, drbg_params->personalization_str_len, params);
+    }
 
     const OSSL_PROVIDER *prov = EVP_RAND_get0_provider(EVP_RAND_CTX_get0_rand(context));
     DRBG *newDRBG = (DRBG*) malloc(sizeof(DRBG));
     newDRBG->context = context;
     newDRBG->seed = NULL;
+    newDRBG->parent = parent;
     return newDRBG;
 }
  
 int next_rand(DRBG *drbg, byte output[], int n_bytes) {
-    return EVP_RAND_generate(drbg->context, output, n_bytes, 128, 0, NULL, 0); 
+    return EVP_RAND_generate(drbg->context, output, n_bytes, DEFAULT_STRENGTH, 0, NULL, 0);
+}
+
+int next_rand_with_params(DRBG *drbg, byte output[], int n_bytes, DRBGParams *params) {
+    return EVP_RAND_generate(drbg->context, output, n_bytes,
+                             params->strength, params->prediction_resistance,
+                             params->additional_data, params->additional_data_length);
+}
+
+int next_rand_int(DRBG *drbg, int num_bits) {
+    if (num_bits <= 0 || num_bits > 32) {
+        return 0; // can this indicate failure?
+    }
+    int num_bytes = num_bits/8 + (num_bits % 8 == 0 ? 0 : 1);
+    int mask = ~(~1 << ((num_bits-1) % 8));
+    byte output[4] = {0};
+    next_rand(drbg, output, num_bytes);
+    output[num_bytes-1] &= mask;
+
+    int o3 = ((0x00ff) & output[3]) << 24;
+    int o2 = ((0x00ff) & output[2]) << 16;
+    int o1 = ((0x00ff) & output[1]) << 8;
+    int o0 = ((0x00ff) & output[0]);
+
+    return o3 | o2 | o1 | o0;
+}
+
+int generate_seed(DRBG* generator, byte output[], int n_bytes) {
+    DRBG *parent = generator->parent;
+    if (parent != NULL) {
+        return next_rand(parent, output, n_bytes);
+    } else {
+        return getentropy(output, n_bytes);
+    }
+}
+
+void reseed(DRBG* generator) {
+    byte seed[128]; // TODO: what should the default seed size be?
+    size_t length = 128;
+    getentropy(seed, length);
+    EVP_RAND_reseed(generator->context, 0, seed, length, NULL, 0);
+}
+
+void reseed_with_seed(DRBG* generator, byte seed[], int seed_length) {
+    EVP_RAND_reseed(generator->context, 0, seed, seed_length, NULL, 0);
+}
+
+void reseed_with_seed_and_params(DRBG* generator, byte seed[], int seed_length, DRBGParams *params) {
+    EVP_RAND_reseed(generator->context, params->prediction_resistance, seed, seed_length, params->additional_data, params->additional_data_length);
 }
