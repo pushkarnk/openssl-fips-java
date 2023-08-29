@@ -4,13 +4,7 @@
 #include <openssl/params.h>
 #include <openssl/provider.h>
 #include <string.h>
-
-
-#define STR_EQUAL(a, b) (0 == strcmp(a, b))
-#define MIN(a, b) (a > b ? b : a)
-
-/* Lets use 'byte' instead of 'char' */
-typedef char byte;
+#include <jssl.h>
 
 #define DEFAULT_STRENGTH 128
 
