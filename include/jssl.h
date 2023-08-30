@@ -1,7 +1,7 @@
 #include <openssl/provider.h>
 #include <string.h>
 
-OSSL_PROVIDER* load_openssl_fips_provider(const char*);
+OSSL_LIB_CTX* load_openssl_fips_provider(const char*);
 
 #define STR_EQUAL(a, b) (0 == strcmp(a, b))
 

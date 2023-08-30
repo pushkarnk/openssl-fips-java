@@ -1,7 +1,12 @@
 #include "cipher.h"
 #include <openssl/err.h>
+#include <stdio.h>
+
+#define IS_MODE_CCM(ctx) (STR_EQUAL(strrchr(ctx->name, '-'), "-CCM"))
+#define IS_OP_DECRYPT(ctx) (ctx->mode == DECRYPT)
 
 #define MAX_CIPHER_TABLE_SIZE 256
+#define TAG_LEN 16
 
 typedef struct name_cipher_map {
     const char *name;
@@ -29,49 +34,14 @@ int get_padding_code(const char *name) {
     }
 }
 
-static int name_table_ready = 0;
 
-static void add_name_table_entry(const char *name, const EVP_CIPHER *cipher) {
-    cipher_table[table_size].name = name;
-    cipher_table[table_size++].cipher = cipher;
-}
-
-static void populate_name_table() {
-    // TODO: handle race conditions
-    if (name_table_ready) return;
-
-    add_name_table_entry("AES-128-CFB128", EVP_aes_128_cfb128());
-    add_name_table_entry("AES-192-CFB128", EVP_aes_192_cfb128());
-    add_name_table_entry("AES-256-CFB128", EVP_aes_256_cfb128());
-
-    name_table_ready = 1;
-}
-
-static const EVP_CIPHER* query_name_table(const char *name) {
-    for (int i = 0; i < table_size; i++) {
-        if (STR_EQUAL(cipher_table[i].name, name)) {
-            return cipher_table[i].cipher;
-        }
-    }
-    return NULL;
-}
-
-static const EVP_CIPHER* get_cipherbyname(const char *name) {
-    const EVP_CIPHER *cipher = EVP_get_cipherbyname(name);
-    if (!IS_NULL(cipher)) return cipher;
-    return query_name_table(name);
-}
-   
-// The caller must ensure name is a valid cipher name
-// aes-cbc, aes-128-ebc
-cipher_context* create_cipher_context(const char *name, const char *padding_name) {
-    populate_name_table();
+cipher_context* create_cipher_context(OSSL_LIB_CTX *libctx, const char *name, const char *padding_name) {
     cipher_context *new_context = (cipher_context*)malloc(sizeof(cipher_context));
     EVP_CIPHER_CTX *new_ctx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(new_ctx);
     new_context->name = name;
     new_context->context = new_ctx;
-    new_context->cipher = get_cipherbyname(name); 
+    new_context->cipher = EVP_CIPHER_fetch(libctx, name, NULL);
     if (IS_NULL(new_context->cipher) || IS_NULL(new_context->context)) {
         return NULL;
     }
@@ -79,29 +49,42 @@ cipher_context* create_cipher_context(const char *name, const char *padding_name
     return new_context;
 }
 
-void cipher_init(cipher_context * ctx, int mode, unsigned char *key, unsigned char *iv) {
-    // TODO: assert mode lies in {-1, 0, 1 }
-    EVP_CipherInit_ex(ctx->context, ctx->cipher, NULL, key, iv, mode);
+void cipher_init(cipher_context * ctx, byte in_buf[], int in_len, unsigned char *key, unsigned char *iv, int iv_len, int mode) {
+    EVP_CipherInit_ex(ctx->context, ctx->cipher, NULL, NULL, NULL, mode);
+    ctx->mode = mode;
+    if (IS_MODE_CCM(ctx)) {
+        EVP_CIPHER_CTX_ctrl(ctx->context, EVP_CTRL_CCM_SET_IVLEN, iv_len, 0);
+        EVP_CIPHER_CTX_ctrl(ctx->context, EVP_CTRL_CCM_SET_TAG, TAG_LEN, mode == ENCRYPT ? 0 : (in_buf + in_len - TAG_LEN));
+    }
+    if (!EVP_CipherInit_ex(ctx->context, NULL, NULL, key, iv, mode)) {
+        ERR_print_errors_fp(stderr);
+    }
     EVP_CIPHER_CTX_set_padding(ctx->context, ctx->padding);
 }
 
-void cipher_update(cipher_context *ctx, byte in_buf[], int in_offset, int in_len,
-            byte out_buf[], int out_offset, int *out_len) {
-    // TODO: examine return value
-    EVP_CipherUpdate(ctx->context, out_buf + out_offset, out_len, in_buf + in_offset, in_len); 
+void cipher_update(cipher_context *ctx, byte out_buf[], int *out_len_ptr, byte in_buf[], int in_len) {
+    if (IS_MODE_CCM(ctx)) {
+        EVP_CipherUpdate(ctx->context, NULL, out_len_ptr, NULL, IS_OP_DECRYPT(ctx) ? in_len-TAG_LEN : in_len);
+    }
+
+    if (!EVP_CipherUpdate(ctx->context, out_buf, out_len_ptr, in_buf,
+                        (IS_MODE_CCM(ctx) && IS_OP_DECRYPT(ctx)) ? in_len-TAG_LEN : in_len)) {
+        ERR_print_errors_fp(stderr);
+    }
 }
 
-void cipher_do_final(cipher_context *ctx, byte *out_buf, int *out_len) {
-    // TODO: examine return value
-    EVP_CipherFinal_ex(ctx->context, out_buf, out_len); 
-}
+void cipher_do_final(cipher_context *ctx, byte *out_buf, int *out_len_ptr) {
+    if (!EVP_CipherFinal_ex(ctx->context, out_buf, out_len_ptr)) {
+        ERR_print_errors_fp(stderr);
+    }
 
-void cipher_cleanup(cipher_context *ctx) {
-    EVP_CIPHER_CTX_cleanup(ctx->context);
+    if (ctx->mode == ENCRYPT && IS_MODE_CCM(ctx)) {
+        *out_len_ptr = TAG_LEN;
+        EVP_CIPHER_CTX_ctrl(ctx->context, EVP_CTRL_CCM_GET_TAG, TAG_LEN, out_buf);
+    }
 }
 
 void cipher_destroy(cipher_context *ctx) {
-    // TODO: handle errors
-    EVP_CIPHER_CTX_cleanup(ctx->context);
+    EVP_CIPHER_CTX_free(ctx->context);
     free(ctx);
 }

@@ -18,26 +18,27 @@ static int array_equals(byte a1[], int l1, byte a2[], int l2) {
     return 1;
 }
 
-int test_round_trip(const char *cipher_type, const char *padding_name) {
-    unsigned char *key = "FEDCBA9876543210";
-    unsigned char *iv = "1234567887654321";
+int test_round_trip(OSSL_LIB_CTX *libctx, const char *cipher_type, const char *padding_name) {
+    unsigned char key[] = {0x5a, 0x33, 0x98, 0x0e, 0x71, 0xe7, 0xd6, 0x7f, 0xd6, 0xcf, 0x17, 0x14, 0x54, 0xdc, 0x96, 0xe5};
+    unsigned char iv[] =  {0x33, 0xae, 0x68, 0xeb, 0xb8, 0x01, 0x0c, 0x6b, 0x3d, 0xa6, 0xb9, 0xcb, 0x29, 0x3a, 0x4d, 0x34};
 
     byte encrypted_output[1024], decrypted_output[1024];
     int enc_out_len = 0, dec_out_len = 0, tmplen = 0; 
  
-    cipher_context *context = create_cipher_context(cipher_type, padding_name);
+    cipher_context *context = create_cipher_context(libctx, cipher_type, padding_name);
     if (IS_NULL(context)) {
+        printf("Null context: ");
         return 0;
     }
 
-    cipher_init(context, ENCRYPT, key, iv);
-    cipher_update(context, input, 0, INPUT_SIZE, encrypted_output, 0, &enc_out_len);
+    cipher_init(context, input, INPUT_SIZE, key, iv, 16, ENCRYPT);
+    cipher_update(context, encrypted_output, &enc_out_len, input, INPUT_SIZE);
     cipher_do_final(context, encrypted_output + enc_out_len, &tmplen);
     enc_out_len += tmplen;
 
     tmplen = 0;
-    cipher_init(context, DECRYPT, key, iv);
-    cipher_update(context, encrypted_output, 0, enc_out_len, decrypted_output, 0, &dec_out_len);
+    cipher_init(context, encrypted_output, enc_out_len, key, iv, 16, DECRYPT);
+    cipher_update(context, decrypted_output, &dec_out_len, encrypted_output, enc_out_len);
     cipher_do_final(context, decrypted_output + dec_out_len, &tmplen);
     dec_out_len += tmplen;
 
@@ -49,9 +50,11 @@ int test_round_trip(const char *cipher_type, const char *padding_name) {
 }
 
 int main(int argc, char ** argv) {
+    OSSL_LIB_CTX *libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
     char *cipher_type[] = {
         "AES-128-ECB",
 	"AES-256-ECB",
+        "AES-192-ECB",
         "AES-128-CBC",
         "AES-256-CBC",
         "AES-128-CFB1",
@@ -60,9 +63,6 @@ int main(int argc, char ** argv) {
         "AES-128-CFB8",
         "AES-192-CFB8",
         "AES-256-CFB8",
-        "AES-128-CFB128",
-        "AES-192-CFB128",
-        "AES-256-CFB128",
         "AES-128-CTR",
         "AES-192-CTR",
         "AES-256-CTR",
@@ -71,7 +71,8 @@ int main(int argc, char ** argv) {
         "AES-192-CCM",
         "AES-128-GCM",
         "AES-192-GCM",
-        "AES-256-GCM"
+        "AES-256-GCM",
+        "END"
     };
 
     char *padding_type[] = {
@@ -83,17 +84,19 @@ int main(int argc, char ** argv) {
         "ISO7816-4"
     }; 
 
-    int n_cipher_types  = 19;
     int n_padding_types = 6;
 
-    for (int i = 0; i < n_cipher_types; i++) {
+    int idx = 0;
+    const char *cipher_name = cipher_type[idx++];
+    while (!STR_EQUAL(cipher_name, "END")) {
         for(int j = 0; j < n_padding_types; j++) {
-            if(!test_round_trip(cipher_type[i], padding_type[j])) {
-                printf("FAILED: test_round_trip(%s, %s)\n", cipher_type[i], padding_type[j]);
+            if(!test_round_trip(libctx, cipher_name, padding_type[j])) {
+                printf("FAILED: test_round_trip(%s, %s)\n", cipher_name, padding_type[j]);
             } else {
-                printf("PASSED: test_round_trip(%s, %s)\n", cipher_type[i], padding_type[j]);
+                printf("PASSED: test_round_trip(%s, %s)\n", cipher_name, padding_type[j]);
             }
         }
+        cipher_name = cipher_type[idx++];
     }
 
     return 0;
