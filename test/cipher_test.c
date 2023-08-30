@@ -27,7 +27,6 @@ int test_round_trip(const char *cipher_type, const char *padding_name) {
  
     cipher_context *context = create_cipher_context(cipher_type, padding_name);
     if (IS_NULL(context)) {
-        printf("here\n");
         return 0;
     }
 
@@ -55,7 +54,24 @@ int main(int argc, char ** argv) {
 	"AES-256-ECB",
         "AES-128-CBC",
         "AES-256-CBC",
-        "AES-256-CFB8"
+        "AES-128-CFB1",
+        "AES-256-CFB1",
+        "AES-192-CFB1",
+        "AES-128-CFB8",
+        "AES-192-CFB8",
+        "AES-256-CFB8",
+        "AES-128-CFB128",
+        "AES-192-CFB128",
+        "AES-256-CFB128",
+        "AES-128-CTR",
+        "AES-192-CTR",
+        "AES-256-CTR",
+        "AES-128-CCM",
+        "AES-256-CCM",
+        "AES-192-CCM",
+        "AES-128-GCM",
+        "AES-192-GCM",
+        "AES-256-GCM"
     };
 
     char *padding_type[] = {
@@ -67,7 +83,7 @@ int main(int argc, char ** argv) {
         "ISO7816-4"
     }; 
 
-    int n_cipher_types  = 5;
+    int n_cipher_types  = 19;
     int n_padding_types = 6;
 
     for (int i = 0; i < n_cipher_types; i++) {

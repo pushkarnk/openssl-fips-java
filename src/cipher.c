@@ -1,6 +1,16 @@
 #include "cipher.h"
 #include <openssl/err.h>
 
+#define MAX_CIPHER_TABLE_SIZE 256
+
+typedef struct name_cipher_map {
+    const char *name;
+    const EVP_CIPHER *cipher;
+} name_cipher_map;
+
+static name_cipher_map cipher_table[MAX_CIPHER_TABLE_SIZE];
+static int table_size;
+
 int get_padding_code(const char *name) {
     if (IS_NULL(name) || STR_EQUAL(name, "NONE")) {
         return 0;
@@ -19,17 +29,43 @@ int get_padding_code(const char *name) {
     }
 }
 
-static EVP_CIPHER* get_cipherbyname(const char *name) {
-    EVP_CIPHER *cipher = EVP_get_cipherbyname(name);
-    if (!IS_NULL(cipher)) return cipher;
+static int name_table_ready = 0;
 
-    /// return query_name_table(name);
+static void add_name_table_entry(const char *name, const EVP_CIPHER *cipher) {
+    cipher_table[table_size].name = name;
+    cipher_table[table_size++].cipher = cipher;
+}
+
+static void populate_name_table() {
+    // TODO: handle race conditions
+    if (name_table_ready) return;
+
+    add_name_table_entry("AES-128-CFB128", EVP_aes_128_cfb128());
+    add_name_table_entry("AES-192-CFB128", EVP_aes_192_cfb128());
+    add_name_table_entry("AES-256-CFB128", EVP_aes_256_cfb128());
+
+    name_table_ready = 1;
+}
+
+static const EVP_CIPHER* query_name_table(const char *name) {
+    for (int i = 0; i < table_size; i++) {
+        if (STR_EQUAL(cipher_table[i].name, name)) {
+            return cipher_table[i].cipher;
+        }
+    }
     return NULL;
+}
+
+static const EVP_CIPHER* get_cipherbyname(const char *name) {
+    const EVP_CIPHER *cipher = EVP_get_cipherbyname(name);
+    if (!IS_NULL(cipher)) return cipher;
+    return query_name_table(name);
 }
    
 // The caller must ensure name is a valid cipher name
 // aes-cbc, aes-128-ebc
 cipher_context* create_cipher_context(const char *name, const char *padding_name) {
+    populate_name_table();
     cipher_context *new_context = (cipher_context*)malloc(sizeof(cipher_context));
     EVP_CIPHER_CTX *new_ctx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init(new_ctx);
