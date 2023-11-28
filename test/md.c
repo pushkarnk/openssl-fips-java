@@ -66,6 +66,10 @@ void test_digest(const char *algo, OSSL_LIB_CTX *libctx) {
 int main(int argc, char ** argv) {
     OSSL_LIB_CTX *libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
     test_digest("SHA1", libctx);
+    test_digest("SHA224", libctx);
+    test_digest("SHA256", libctx);
+    test_digest("SHA384", libctx);
+    test_digest("SHA512", libctx);
     test_digest("SHA2-224", libctx);
     test_digest("SHA2-256", libctx);
     test_digest("SHA2-384", libctx);
