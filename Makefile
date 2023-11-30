@@ -5,7 +5,8 @@ build:
         cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/keyagreement.c -o build/bin/keyagreement.o && \
         cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/keyencapsulation.c -o build/bin/keyencapsulation.o && \
         cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/mac.c -o build/bin/mac.o && \
-        cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/md.c -o build/bin/md.o && \
+	cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/md.c -o build/bin/md.o && \
+	cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/signature.c -o build/bin/signature.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o build/bin/libjssl.so \
 		build/bin/init.o   \
 		build/bin/drbg.o   \
@@ -14,6 +15,7 @@ build:
                 build/bin/keyencapsulation.o \
                 build/bin/mac.o \
                 build/bin/md.o \
+		build/bin/signature.o \
 		-L/usr/local/lib64 -lcrypto -lssl
 
 test-drbg: build
@@ -37,5 +39,8 @@ test-mac: build
 test-md: build
 	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/ -L/usr/local/lib64 -o build/test/md test/md.c -ljssl && \
 	LD_LIBRARY_PATH=./build/bin ./build/test/md 2>/dev/null
+test-sv: build
+	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/ -L/usr/local/lib64 -o build/test/signature test/signature.c -ljssl && \
+	LD_LIBRARY_PATH=./build/bin ./build/test/signature 2>/dev/null
 clean:
 	@rm -rf build

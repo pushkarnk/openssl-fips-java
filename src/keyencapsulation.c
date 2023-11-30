@@ -6,7 +6,7 @@
 # define TEST_ptr(a)          (a)
 # define TEST_true(a)         ((a) != 0)
 
-static int rsa_keygen(OSSL_LIB_CTX *libctx, int bits, EVP_PKEY **pub, EVP_PKEY **priv)
+int rsa_keygen(OSSL_LIB_CTX *libctx, int bits, EVP_PKEY **pub, EVP_PKEY **priv)
 {
     int ret = 0;
     unsigned char *pub_der = NULL;

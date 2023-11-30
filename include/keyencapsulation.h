@@ -22,3 +22,6 @@ int generate_and_wrap(kem_keyspec *spec);
 int unwrap(kem_keyspec *spec);
 
 void free_kem_keyspec(kem_keyspec *spec);
+
+//util
+int rsa_keygen(OSSL_LIB_CTX *libctx, int bits, EVP_PKEY **pub, EVP_PKEY **priv);
