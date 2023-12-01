@@ -7,6 +7,7 @@ build:
         cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/mac.c -o build/bin/mac.o && \
 	cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/md.c -o build/bin/md.o && \
 	cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/signature.c -o build/bin/signature.o && \
+        cc -I./include -I/usr/local/include/openssl/ -I./include -c -fPIC src/kdf.c -o build/bin/kdf.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o build/bin/libjssl.so \
 		build/bin/init.o   \
 		build/bin/drbg.o   \
@@ -16,6 +17,7 @@ build:
                 build/bin/mac.o \
                 build/bin/md.o \
 		build/bin/signature.o \
+                build/bin/kdf.o \
 		-L/usr/local/lib64 -lcrypto -lssl
 
 test-drbg: build
@@ -42,5 +44,8 @@ test-md: build
 test-sv: build
 	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/ -L/usr/local/lib64 -o build/test/signature test/signature.c -ljssl -lcrypto && \
 	LD_LIBRARY_PATH=./build/bin ./build/test/signature 2>/dev/null
+test-kdf: build
+	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/ -L/usr/local/lib64 -o build/test/kdf test/kdf.c -ljssl && \
+	LD_LIBRARY_PATH=./build/bin ./build/test/kdf 2>/dev/null
 clean:
 	@rm -rf build
