@@ -40,7 +40,7 @@ test-md: build
 	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/ -L/usr/local/lib64 -o build/test/md test/md.c -ljssl && \
 	LD_LIBRARY_PATH=./build/bin ./build/test/md 2>/dev/null
 test-sv: build
-	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/ -L/usr/local/lib64 -o build/test/signature test/signature.c -ljssl && \
+	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/ -L/usr/local/lib64 -o build/test/signature test/signature.c -ljssl -lcrypto && \
 	LD_LIBRARY_PATH=./build/bin ./build/test/signature 2>/dev/null
 clean:
 	@rm -rf build

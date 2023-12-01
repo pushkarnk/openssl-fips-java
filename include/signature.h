@@ -1,7 +1,7 @@
 #include "jssl.h"
 #include <openssl/evp.h>
-#include <openssl/rsa.h>
 
+typedef enum sv_type { SV_RSA, SV_ED25519, SV_ED448 } sv_type;
 typedef enum sv_state { UNINITIALISED, SIGN, VERIFY } sv_state;
 typedef enum sv_padding_mode { NONE, PSS } sv_padding_mode;
 
@@ -31,13 +31,15 @@ sv_key *sv_init_key(OSSL_LIB_CTX *libctx, EVP_PKEY *key);
 
 typedef struct sv_context {
     sv_state state;
+    sv_type type;
+    sv_key *key;
     byte *data;
     int length;
-    sv_key *key;
+    EVP_MD_CTX *mctx;
 } sv_context;
 
 sv_params *sv_create_params(OSSL_LIB_CTX *libctx, int salt_length, sv_padding_mode padding, char *digest, char *mgf1_digest);
-sv_context *sv_init(OSSL_LIB_CTX *libctx, sv_key *key, sv_params *params, sv_state op);
+sv_context *sv_init(OSSL_LIB_CTX *libctx, sv_key *key, sv_params *params, sv_state op, sv_type type);
 int sv_update(sv_context *ctx, byte *data, size_t length);
 int sv_sign(sv_context *ctx, byte *signature, size_t *signature_length);
-int sv_verify(sv_context *ctx, byte *data, size_t data_len, byte *signature, size_t sig_length);
+int sv_verify(sv_context *ctx, byte *signature, size_t sig_length);

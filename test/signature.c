@@ -1,4 +1,3 @@
-#include "jssl.h"
 #include "signature.h"
 #include "md.h"
 #include "keyencapsulation.h"
@@ -8,73 +7,108 @@
 
 char* message = "Into the valley of death, rode the six hundred!";
  
-void test_rsa_sign_and_verify(OSSL_LIB_CTX *libctx) {
-    printf("Testing RSA sign and verify: ");
-    // create public and private RSA keys
-    EVP_PKEY *public_key = NULL, *private_key = NULL;
-    rsa_keygen(libctx, 4096, &public_key, &private_key);
+void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *private_key, char *digest, sv_type type) {
+    // TODO: this crashes in openssl/fips.so
+    // sv_params *p = sv_create_params(libctx, -1, PSS, "SHA-256", "SHA-256");
 
-    // create a SHA-256 MD
-    byte output[EVP_MAX_MD_SIZE] = {0};
-    int len = 0;
-    md_context *ctx = md_init(libctx, "SHA-256");
+    // This fails because the default mask generation hash - mgf1 - is SHA-1 and FIPS hates it :/
+    // sv_params *p = sv_create_params(libctx, -1, PSS, "SHA-256", NULL);
 
-    if (ctx == NULL) {
-        md_context_free(ctx);
-        printf("FAILED (MD)\n");
-    }
-
-    if (!(md_update(ctx, message, strlen(message)))) {
-        md_context_free(ctx);
-        printf("FAILED (MD)\n");
-        return;
-    }
-
-    if (!md_digest(ctx, output, &len)) {
-        md_context_free(ctx);
-        printf("FAILED (MD)\n");
-        return;
-    }
-    md_context_free(ctx);
-
-    // sign the MD with the private key
-    sv_params *p = sv_create_params(libctx, -1, PSS, "SHA-256", NULL);
+    // So test without padding for now 
+    sv_params *p = sv_create_params(libctx, -1, NONE, digest, NULL);
     sv_key *key = sv_init_key(libctx, private_key);
-    sv_context *svc = sv_init(libctx, key, p, SIGN);
+
+    sv_context *svc = sv_init(libctx, key, p, SIGN, type);
     if (NULL == svc) {
         printf("FAILED (sign init)\n");
         return;
     }
+    sv_update(svc, message, strlen(message));
 
-    sv_update(svc, output, len);
-
-    size_t length = 0;
-    if (sv_sign(svc, NULL, &length) < 0) {
+    size_t sig_length = 0;
+    if (sv_sign(svc, NULL, &sig_length) < 0) {
         printf("FAILED (signing)\n");
         return;
     }
 
-    byte *signature = (byte *)malloc(length);
-    if (sv_sign(svc, signature, &length) < 0) {
+    byte *signature = (byte *)malloc(sig_length);
+    if (sv_sign(svc, signature, &sig_length) < 0) {
         printf("FAILED (signing)\n");
         return;
     }
-    // verify with the public key
+
     sv_key *pubkey = sv_init_key(libctx, public_key);
-    sv_context *svc1 = sv_init(libctx, pubkey, p, VERIFY);
+    sv_context *svc1 = sv_init(libctx, pubkey, p, VERIFY, type);
     if (NULL == svc1) {
         printf("FAILED (verify init)\n");
         return;
     }
 
-    if (sv_verify(svc1, output, len, signature, length) <= 0) {
+    if (sv_update(svc1, message, strlen(message)) <= 0) {
+        printf("FAILED (verify update) \n");
+        return;  
+    }
+
+    if (sv_verify(svc1, signature, sig_length) <= 0) {
         printf("FAILED (verify)\n");
         return;
     }
+
     printf("PASSED\n");
 }
+
+void test_rsa_sign_and_verify(OSSL_LIB_CTX *libctx) {
+    printf("Testing RSA sign and verify: ");
+
+    EVP_PKEY *public_key = NULL, *private_key = NULL;
+    rsa_keygen(libctx, 4096, &public_key, &private_key);
+    test_sign_and_verify(libctx, public_key, private_key, "SHA-256", SV_RSA);
+}
+
+void test_ed25519_sign_and_verify(OSSL_LIB_CTX *libctx) {
+    printf("Testing ED25519 sign and verify: ");
+
+    EVP_PKEY *public_key = NULL, *private_key = NULL;
+    FILE *priv_key_pem = fopen("test/keys/ed25519-priv.pem", "r");
+    FILE *pub_key_pem = fopen("test/keys/ed25519-pub.pem", "r");
+
+    if (priv_key_pem == NULL || pub_key_pem == NULL) {
+        printf("FAILED (can't read PEM files)\n");
+    }
+
+    private_key = PEM_read_PrivateKey_ex(priv_key_pem, NULL, NULL, NULL, libctx, NULL);
+    public_key = PEM_read_PUBKEY_ex(pub_key_pem, NULL, NULL, NULL, libctx, NULL);
+
+    if (private_key == NULL || public_key == NULL) {
+        printf("FAILED (can't decode PEM files)");
+    }
+    test_sign_and_verify(libctx, public_key, private_key, NULL, SV_ED25519);
+}
+
+void test_ed448_sign_and_verify(OSSL_LIB_CTX *libctx) {
+    printf("Testing ED448 sign and verify: ");
+
+    EVP_PKEY *public_key = NULL, *private_key = NULL;
+    FILE *priv_key_pem = fopen("test/keys/ed448-priv.pem", "r");
+    FILE *pub_key_pem = fopen("test/keys/ed448-pub.pem", "r");
+    
+    if (priv_key_pem == NULL || pub_key_pem == NULL) {
+        printf("FAILED (can't read PEM files)\n");
+    }
+    
+    private_key = PEM_read_PrivateKey_ex(priv_key_pem, NULL, NULL, NULL, libctx, NULL);
+    public_key = PEM_read_PUBKEY_ex(pub_key_pem, NULL, NULL, NULL, libctx, NULL);
+    
+    if (private_key == NULL || public_key == NULL) {
+        printf("FAILED (can't decode PEM files)");
+    }
+    test_sign_and_verify(libctx, public_key, private_key, NULL, SV_ED448);
+}
+
 
 int main(int argc, char ** argv) {
     OSSL_LIB_CTX *libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf"); 
     test_rsa_sign_and_verify(libctx);
+    test_ed25519_sign_and_verify(libctx);
+    test_ed448_sign_and_verify(libctx);
 }
