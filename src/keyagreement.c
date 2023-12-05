@@ -103,7 +103,6 @@ void free_shared_secret(shared_secret *this) {
 void free_key_agreement(key_agreement *this) {
     EVP_PKEY_free(this->private_key);
     EVP_PKEY_free(this->peer_public_key);
-    free_shared_secret(this->secret);
     free(this);
 }
 
@@ -111,5 +110,3 @@ void free_key_pair(key_pair *this) {
     EVP_PKEY_free(this->key);
     free(this);
 }
-
-

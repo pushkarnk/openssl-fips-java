@@ -72,7 +72,13 @@ DRBG* create_DRBG_with_params(const char* name, DRBG* parent, DRBGParams *drbg_p
     newDRBG->parent = parent;
     return newDRBG;
 }
- 
+
+int free_DRBG(DRBG *generator) {
+    EVP_RAND_CTX_free(generator->context);
+    free(generator);
+    return 1;
+}
+
 int next_rand(DRBG *drbg, byte output[], int n_bytes) {
     return EVP_RAND_generate(drbg->context, output, n_bytes, DEFAULT_STRENGTH, 0, NULL, 0);
 }

@@ -22,34 +22,34 @@ void test_digest(const char *algo, OSSL_LIB_CTX *libctx) {
     md_context *ctx = md_init(libctx, algo);
 
     if (ctx == NULL) {
-        md_context_free(ctx);
+        free_md_context(ctx);
         printf("FAILED (init)\n");
     }
 
     if (!(md_update(ctx, message1, strlen(message1)) &&
         md_update(ctx, message2, strlen(message2)))) {
-        md_context_free(ctx);
+        free_md_context(ctx);
         printf("FAILED (update)\n");
         return;
     }
 
     if (!md_digest(ctx, output1, &len1)) {
-        md_context_free(ctx);
+        free_md_context(ctx);
         printf("FAILED (digest)\n");
         return;
     }
-    md_context_free(ctx);
+    free_md_context(ctx);
 
     md_context *ctx1 = md_init(libctx, algo);
     if (!(md_update(ctx1, message1, strlen(message1)) &&
         md_update(ctx1, message3, strlen(message3)))) {
-        md_context_free(ctx1);
+        free_md_context(ctx1);
         printf("FAILED (update)\n");
         return;   
     }
 
     if (!md_digest(ctx1, output2, &len2)) {
-        md_context_free(ctx1);
+        free_md_context(ctx1);
         printf("FAILED (digest)\n");
         return;
     }
@@ -59,7 +59,7 @@ void test_digest(const char *algo, OSSL_LIB_CTX *libctx) {
        return;
     }
 
-    md_context_free(ctx1);
+    free_md_context(ctx1);
     printf("PASSED\n"); 
 }
 

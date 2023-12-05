@@ -42,6 +42,7 @@ int test_round_trip(OSSL_LIB_CTX *libctx, const char *cipher_type, const char *p
     cipher_do_final(context, decrypted_output + dec_out_len, &tmplen);
     dec_out_len += tmplen;
 
+    free_cipher(context);
     if (array_equals(decrypted_output, dec_out_len, input, INPUT_SIZE)) {
         return 1;
     } else {

@@ -8,7 +8,7 @@
 typedef struct cipher_context {
     const char *name;
     EVP_CIPHER_CTX *context;
-    const EVP_CIPHER* cipher;
+    EVP_CIPHER* cipher;
     int mode;
     int padding;
 } cipher_context;
@@ -21,6 +21,4 @@ void cipher_update(cipher_context *ctx, byte out[], int *out_len_ptr, byte in[],
 
 void cipher_do_final(cipher_context *ctx, byte *out, int *out_len_ptr);
 
-void cipher_cleanup(cipher_context *ctx);
-
-void cipher_destroy(cipher_context *ctx);
+void free_cipher(cipher_context *ctx);

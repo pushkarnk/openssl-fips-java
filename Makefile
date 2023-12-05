@@ -22,7 +22,7 @@ build:
 
 test-drbg: build
 	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/  -o build/test/drbg_test test/drbg_test.c -ljssl && \
-	build/test/drbg_test 2>/dev/null
+	LD_LIBRARY_PATH=./build/bin build/test/drbg_test 2>/dev/null
 
 test-cipher: build
 	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/  -o build/test/cipher_test test/cipher_test.c -ljssl && \

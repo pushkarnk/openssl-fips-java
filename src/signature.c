@@ -109,3 +109,18 @@ int sv_verify(sv_context *ctx, byte *signature, size_t sig_length) {
     }
     return EVP_DigestVerifyFinal(ctx->mctx, signature, sig_length);
 }
+
+void free_sv_params(sv_params *params) {
+    EVP_MD_free(params->digest);
+    EVP_MD_free(params->mgf1_digest);
+    free(params);
+}
+
+void free_sv_key(sv_key *key) {
+    EVP_PKEY_CTX_free(key->ctx);
+    free(key);
+}
+                                                                            void free_sv_context(sv_context *context) {
+    EVP_MD_CTX_free(context->mctx);
+    free(context);
+}

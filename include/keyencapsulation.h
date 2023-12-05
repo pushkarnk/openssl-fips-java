@@ -23,5 +23,5 @@ int unwrap(kem_keyspec *spec);
 
 void free_kem_keyspec(kem_keyspec *spec);
 
-//util
+//TODO: move this to a utils file
 int rsa_keygen(OSSL_LIB_CTX *libctx, int bits, EVP_PKEY **pub, EVP_PKEY **priv);

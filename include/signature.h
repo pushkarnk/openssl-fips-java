@@ -43,3 +43,7 @@ sv_context *sv_init(OSSL_LIB_CTX *libctx, sv_key *key, sv_params *params, sv_sta
 int sv_update(sv_context *ctx, byte *data, size_t length);
 int sv_sign(sv_context *ctx, byte *signature, size_t *signature_length);
 int sv_verify(sv_context *ctx, byte *signature, size_t sig_length);
+
+void free_sv_params(sv_params *params);
+void free_sv_key(sv_key *key);
+void free_sv_context(sv_context *context);

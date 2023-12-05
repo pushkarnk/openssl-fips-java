@@ -9,4 +9,4 @@ typedef struct md_context {
 md_context *md_init(OSSL_LIB_CTX *libctx, const char *algorithm);
 int md_update(md_context *ctx, byte *input, size_t input_length);
 int md_digest(md_context *ctx, byte *output, int *output_length);
-void md_context_free(md_context *ctx);
+void free_md_context(md_context *ctx);

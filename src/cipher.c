@@ -84,7 +84,8 @@ void cipher_do_final(cipher_context *ctx, byte *out_buf, int *out_len_ptr) {
     }
 }
 
-void cipher_destroy(cipher_context *ctx) {
+void free_cipher(cipher_context *ctx) {
     EVP_CIPHER_CTX_free(ctx->context);
+    EVP_CIPHER_free(ctx->cipher);
     free(ctx);
 }

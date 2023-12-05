@@ -18,7 +18,7 @@ md_context *md_init(OSSL_LIB_CTX *libctx, const char *algorithm) {
 
 int md_update(md_context *ctx, byte *input, size_t input_length) {
     if (!EVP_DigestUpdate(ctx->ossl_ctx, input, input_length)) {
-        md_context_free(ctx);
+        free_md_context(ctx);
         return 0;
     }
     return 1;
@@ -26,13 +26,13 @@ int md_update(md_context *ctx, byte *input, size_t input_length) {
 
 int md_digest(md_context *ctx, byte *output, int *output_length) {
     if (!EVP_DigestFinal_ex(ctx->ossl_ctx, output, output_length)) {
-        md_context_free(ctx);
+        free_md_context(ctx);
         return 0;
     }
     return 1;
 }
 
-void md_context_free(md_context *ctx) {
+void free_md_context(md_context *ctx) {
     EVP_MD_CTX_free(ctx->ossl_ctx);
     free(ctx);
 }

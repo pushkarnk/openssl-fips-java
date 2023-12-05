@@ -37,6 +37,9 @@ typedef union {
     hkdf_params *hkdf;
 } kdf_params;
 
+void free_kdf_spec(kdf_spec *spec);
+void free_kdf_params(kdf_params *params);
+
 kdf_params *create_hkdf_params(char *algorithm);
 kdf_spec *create_hkdf_spec(byte *salt, int saltlen, byte *info, int infolen, byte *key, int keylen);
 

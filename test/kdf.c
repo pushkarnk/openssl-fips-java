@@ -32,8 +32,12 @@ void test_pbkdf2(OSSL_LIB_CTX *libctx) {
     byte output[64] = {0};
     if (kdf_derive(libctx, spec, params, output, 64, PBKDF2) <= 0) {
         printf("FAILED (derive)\n");
+        free_kdf_spec(spec);
+        free_kdf_params(params);
         return;
     }
+    free_kdf_spec(spec);
+    free_kdf_params(params);
     printf("PASSED\n");
  
 }
@@ -44,9 +48,13 @@ void test_hkdf(OSSL_LIB_CTX *libctx) {
     kdf_params *params = create_pbkdf_params("SHA-256");
     byte output[42] = {0};
     if (kdf_derive(libctx, spec, params, output, 42, HKDF) <= 0) {
+        free_kdf_spec(spec);
+        free_kdf_params(params);
         printf("FAILED (derive)\n");
         return;
     }
+    free_kdf_spec(spec);
+    free_kdf_params(params);
     printf("PASSED\n");
 }
 

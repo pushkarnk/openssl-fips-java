@@ -22,7 +22,6 @@ typedef struct _DRBG {
     byte* seed;
     EVP_RAND_CTX* context;
     struct _DRBG* parent;
-    DRBGParams *drbg_params;
 } DRBG;
 
 /* Fetch and initialize a DRBG instance */
@@ -31,7 +30,7 @@ DRBG* create_DRBG(const char* name, DRBG* parent);
 DRBG* create_DRBG_with_params(const char *name, DRBG *parent, DRBGParams *params);
 
 /* Destroy the given DRBG */
-int destroy_DRBG(DRBG* generator);
+int free_DRBG(DRBG* generator);
 
 /* Generate a seed of size n_bytes
  * If a parent EVP_RAND was used, generate a seed (bytes) using it

@@ -7,12 +7,13 @@ void test_xxx_drbg(const char *test, const char *algo) {
     next_rand(drbg, output1, 10);
     next_rand(drbg, output2, 10);
     for (int i = 0; i < 10; i++) {
-        if(output1[i] == output2[i]) {
-            printf("drbg_test/%s: FAIL\n", test); 
+        if(output1[i] != output2[i]) {
+            printf("drbg_test/%s: PASS\n", test);
             return;
         }
     }
-    printf("drbg_test/%s: PASS\n", test);
+    printf("drbg_test/%s: FAIL\n", test);
+    free_DRBG(drbg);
 }
 
 void test_basic_hmac_drbg() {
@@ -28,10 +29,12 @@ void test_basic_ctr_drbg() {
 }
 
 void test_xxx_drbg_fails(const char *test, const char *algo) {
-    if (NULL == create_DRBG(algo, NULL)) {
+    DRBG *drbg = NULL;
+    if (NULL == (drbg = create_DRBG(algo, NULL))) {
         printf("drbg_test/%s: PASS\n", test);
     } else {
         printf("drbg_test/%s: FAIL\n", test);
+        free_DRBG(drbg);
     }
 }
 
@@ -49,6 +52,7 @@ void test_rand_int_num_bits(const char *algo, int num_bits) {
         printf("drbg_test/test_rand_int_num_bits: FAIL\n");
     } else {
         printf("next_rand_int(%d) = %x (PASS)\n", num_bits, next_rand_int(drbg, num_bits));
+        free_DRBG(drbg);
     }
 }
 
