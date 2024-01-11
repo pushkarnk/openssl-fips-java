@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+DRBGParams NO_PARAMS = { DEFAULT_STRENGTH, 0, 0, NULL, 0, NULL, 0 };
+
 /* Created the necessary params for the given algorithm 
  * Return the number of parameters added to `params`
  */
@@ -117,10 +119,14 @@ int generate_seed(DRBG* generator, byte output[], int n_bytes) {
 }
 
 void reseed(DRBG* generator) {
+    reseed_with_params(generator, &NO_PARAMS);
+}
+
+void reseed_with_params(DRBG *generator, DRBGParams *params) {
     byte seed[128]; // TODO: what should the default seed size be?
     size_t length = 128;
     getentropy(seed, length);
-    EVP_RAND_reseed(generator->context, 0, seed, length, NULL, 0);
+    EVP_RAND_reseed(generator->context, params->prediction_resistance, seed, length, params->additional_data, params->additional_data_length);
 }
 
 void reseed_with_seed(DRBG* generator, byte seed[], int seed_length) {

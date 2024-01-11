@@ -3,9 +3,13 @@
 
 void test_xxx_drbg(const char *test, const char *algo) {
     DRBG *drbg = create_DRBG(algo, NULL);
-    byte output1[10] = {0}, output2[10] = {0};
+    byte output1[10] = {0}, output2[10] = {0}, output3[10] = {0};
     next_rand(drbg, output1, 10);
     next_rand(drbg, output2, 10);
+    next_rand(drbg, output3, 10);
+    for (int i = 0; i < 10; i++) {
+        printf("output3[%d] = %d\n", i, output3[i]);
+    }
     for (int i = 0; i < 10; i++) {
         if(output1[i] != output2[i]) {
             printf("drbg_test/%s: PASS\n", test);

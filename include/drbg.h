@@ -10,6 +10,7 @@
 
 typedef struct DRBGParams {
     int prediction_resistance;
+    int reseed;
     int strength;
     byte *additional_data;
     int additional_data_length;
@@ -44,6 +45,8 @@ int generate_seed(DRBG* generator, byte output[], int n_bytes);
  */
 
 void reseed(DRBG* generator);
+
+void reseed_with_params(DRBG *generator, DRBGParams *params);
 
 void reseed_with_seed(DRBG* generator, byte seed[], int seed_length);
 

@@ -1,6 +1,11 @@
-build:
+JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
+LIBPATH=/home/pushkarnk/work/2024/sprint1/5207/openssl-fips-jni-wrapper/build/bin/
+
+java-build: 
+	@mkdir -p build/classes && ${JAVA_HOME}/bin/javac -d build/classes src/java/com/canonical/openssl/*.java
+build:	java-build
 	@mkdir -p build/bin && cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/drbg.c -o build/bin/drbg.o && \
-	cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/init.c -o build/bin/init.o && \
+	cc -I/usr/local/include/openssl/ -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/  -c -fPIC src/init.c -o build/bin/init.o && \
         cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/cipher.c -o build/bin/cipher.o && \
         cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/keyagreement.c -o build/bin/keyagreement.o && \
         cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/keyencapsulation.c -o build/bin/keyencapsulation.o && \
@@ -8,6 +13,8 @@ build:
 	cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/md.c -o build/bin/md.o && \
 	cc -I/usr/local/include/openssl/ -I./include -c -fPIC src/signature.c -o build/bin/signature.o && \
         cc -I./include -I/usr/local/include/openssl/ -I./include -c -fPIC src/kdf.c -o build/bin/kdf.o && \
+        cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
+		src/com_canonical_openssl_OpenSSLDrbg.c -o build/bin/com_canonical_openssl_OpenSSLDrbg.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o build/bin/libjssl.so \
 		build/bin/init.o   \
 		build/bin/drbg.o   \
@@ -18,7 +25,12 @@ build:
                 build/bin/md.o \
 		build/bin/signature.o \
                 build/bin/kdf.o \
+		build/bin/com_canonical_openssl_OpenSSLDrbg.o \
 		-L/usr/local/lib64 -lcrypto -lssl
+
+test-java-drbg: build
+	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/DrbgTest.java && \
+	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java DrbgTest 
 
 test-drbg: build
 	@mkdir -p build/test &&  cc -I./include/ -L./build/bin/  -o build/test/drbg_test test/drbg_test.c -ljssl && \

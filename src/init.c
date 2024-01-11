@@ -2,6 +2,10 @@
 #include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <stdio.h>
+#include "jni.h"
+
+/* Global libctx handle. Will be initializaed in JNI_OnLoad */
+OSSL_LIB_CTX *global_libctx = NULL;
 
 /* Loading the FIPS provider is often not enough to get openssl's full functionality.
    We also should load the base provider. The base provider does not provide for
@@ -33,4 +37,9 @@ OSSL_LIB_CTX* load_openssl_fips_provider(const char* conf_file_path) {
 
 OSSL_LIB_CTX* load_openssl_base_provider(const char* conf_file_path) {
     load_openssl_provider("base", conf_file_path);
+}
+
+int JNI_OnLoad(JavaVM* vm, void *reserved) {
+    global_libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
+    return JNI_VERSION_21;
 }
