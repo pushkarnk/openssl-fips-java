@@ -33,6 +33,7 @@ int test_round_trip(OSSL_LIB_CTX *libctx, const char *cipher_type, const char *p
 
     cipher_init(context, input, INPUT_SIZE, key, iv, 16, ENCRYPT);
     cipher_update(context, encrypted_output, &enc_out_len, input, INPUT_SIZE);
+    cipher_update(context, encrypted_output + enc_out_len, &enc_out_len, input, INPUT_SIZE);
     cipher_do_final(context, encrypted_output + enc_out_len, &tmplen);
     enc_out_len += tmplen;
 
