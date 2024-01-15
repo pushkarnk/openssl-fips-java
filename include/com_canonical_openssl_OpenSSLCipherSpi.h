@@ -18,9 +18,9 @@ JNIEXPORT jlong JNICALL Java_OpenSSLCipherSpi_createContext0
 /*
  * Class:     OpenSSLCipherSpi
  * Method:    doInit0
- * Signature: ([BII[B[BI)[B
+ * Signature: ([BII[B[BI)V
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doInit0
+JNIEXPORT void JNICALL Java_OpenSSLCipherSpi_doInit0
   (JNIEnv *, jobject, jbyteArray, jint, jint, jbyteArray, jbyteArray, jint);
 
 /*
@@ -34,7 +34,7 @@ JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doUpdate0
 /*
  * Class:     OpenSSLCipherSpi
  * Method:    doFinal0
- * Signature: ([BII)[B
+ * Signature: ([BI)[B
  */
 JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doFinal0
   (JNIEnv *, jobject, jbyteArray, jint);

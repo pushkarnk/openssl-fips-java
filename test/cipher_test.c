@@ -6,7 +6,23 @@
 static byte input[] = { 0x1, 0x10, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
                         0x2, 0x20, 0x2f, 0x2e, 0x2d, 0x2c, 0x2b, 0x2a,
                         0x3, 0x30, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
+                        0x4, 0x40, 0x4f, 0x4e, 0x4d, 0x4c, 0x4b, 0x4a,
+                        0x1, 0x10, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f,
+                        0x2, 0x20, 0x2f, 0x2e, 0x2d, 0x2c, 0x2b, 0x2a,
+                        0x3, 0x30, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                         0x4, 0x40, 0x4f, 0x4e, 0x4d, 0x4c, 0x4b, 0x4a };
+
+void print_byte_array(byte *array, int length) {
+    printf("[ ");
+    for (int i = 0; i < length; i++) {
+        printf("%d", array[i]);
+        if (i < length-1) {
+            printf(", ");
+        }
+    }
+    printf(" ]\n");
+}
+
 
 static int array_equals(byte a1[], int l1, byte a2[], int l2) {
     if (l1 != l2) return 0;
@@ -31,20 +47,23 @@ int test_round_trip(OSSL_LIB_CTX *libctx, const char *cipher_type, const char *p
         return 0;
     }
 
+    int total_enc_out_len = 0;
     cipher_init(context, input, INPUT_SIZE, key, iv, 16, ENCRYPT);
     cipher_update(context, encrypted_output, &enc_out_len, input, INPUT_SIZE);
-    cipher_update(context, encrypted_output + enc_out_len, &enc_out_len, input, INPUT_SIZE);
-    cipher_do_final(context, encrypted_output + enc_out_len, &tmplen);
-    enc_out_len += tmplen;
-
+    total_enc_out_len += enc_out_len;
+    cipher_update(context, encrypted_output + total_enc_out_len, &enc_out_len, input, INPUT_SIZE);
+    total_enc_out_len += enc_out_len;
+    cipher_do_final(context, encrypted_output + total_enc_out_len, &tmplen);
+    total_enc_out_len += tmplen;
+    //printf("total len = %d\n", total_enc_out_len);
+    //print_byte_array(encrypted_output, total_enc_out_len);
     tmplen = 0;
     cipher_init(context, encrypted_output, enc_out_len, key, iv, 16, DECRYPT);
-    cipher_update(context, decrypted_output, &dec_out_len, encrypted_output, enc_out_len);
+    cipher_update(context, decrypted_output, &dec_out_len, encrypted_output, total_enc_out_len);
     cipher_do_final(context, decrypted_output + dec_out_len, &tmplen);
     dec_out_len += tmplen;
-
     free_cipher(context);
-    if (array_equals(decrypted_output, dec_out_len, input, INPUT_SIZE)) {
+    if (array_equals(decrypted_output, dec_out_len, input, INPUT_SIZE*2)) {
         return 1;
     } else {
         return 0;
@@ -79,7 +98,7 @@ int main(int argc, char ** argv) {
 
     char *padding_type[] = {
         "NONE",
-        "PKCS7",
+        "PKCS7" ,
         "PKCS5",
         "ISO10126-2",
         "X9.23",

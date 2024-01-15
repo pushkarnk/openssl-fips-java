@@ -8,6 +8,17 @@
 #define MAX_CIPHER_TABLE_SIZE 256
 #define TAG_LEN 16
 
+void print_byte_array(byte *array, int length) {
+    printf("[ ");
+    for (int i = 0; i < length; i++) {
+        printf("%d", array[i]);
+        if (i < length-1) {
+            printf(", ");
+        }
+    }
+    printf(" ]\n");
+}
+ 
 typedef struct name_cipher_map {
     const char *name;
     const EVP_CIPHER *cipher;
@@ -34,7 +45,6 @@ int get_padding_code(const char *name) {
     }
 }
 
-
 cipher_context* create_cipher_context(OSSL_LIB_CTX *libctx, const char *name, const char *padding_name) {
     cipher_context *new_context = (cipher_context*)malloc(sizeof(cipher_context));
     EVP_CIPHER_CTX *new_ctx = EVP_CIPHER_CTX_new();
@@ -53,8 +63,8 @@ void cipher_init(cipher_context * ctx, byte in_buf[], int in_len, unsigned char 
     EVP_CipherInit_ex(ctx->context, ctx->cipher, NULL, NULL, NULL, mode);
     ctx->mode = mode;
     if (IS_MODE_CCM(ctx)) {
-        EVP_CIPHER_CTX_ctrl(ctx->context, EVP_CTRL_CCM_SET_IVLEN, iv_len, 0);
-        EVP_CIPHER_CTX_ctrl(ctx->context, EVP_CTRL_CCM_SET_TAG, TAG_LEN, mode == ENCRYPT ? 0 : (in_buf + in_len - TAG_LEN));
+       EVP_CIPHER_CTX_ctrl(ctx->context, EVP_CTRL_CCM_SET_IVLEN, iv_len, 0);
+       EVP_CIPHER_CTX_ctrl(ctx->context, EVP_CTRL_CCM_SET_TAG, TAG_LEN, mode == ENCRYPT ? 0 : (in_buf + in_len - TAG_LEN));
     }
     if (!EVP_CipherInit_ex(ctx->context, NULL, NULL, key, iv, mode)) {
         ERR_print_errors_fp(stderr);

@@ -29,6 +29,7 @@ build:	java-build
 		build/bin/signature.o \
                 build/bin/kdf.o \
 		build/bin/com_canonical_openssl_OpenSSLDrbg.o \
+                build/bin/com_canonical_openssl_OpenSSLCipherSpi.o \
 		-L/usr/local/lib64 -lcrypto -lssl
 
 test-java-cipher: build

@@ -1,7 +1,7 @@
-public class Aes128OpenSSLCipherSpi extends OpenSSLCipherSpi {
+public class AesOpenSSLCipherSpi extends OpenSSLCipherSpi {
 
-    public Aes128OpenSSLCipherSpi(String mode, String padding) {
-        super("AES-128", mode, padding);
+    public AesOpenSSLCipherSpi(String nameKeySizeMode, String padding) {
+        super(nameKeySizeMode, padding);
     }
 
     @Override 
