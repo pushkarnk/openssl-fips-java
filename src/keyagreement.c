@@ -18,11 +18,13 @@ void set_peer_key(key_agreement *agreement, key_pair *peer_public_key) {
 
 shared_secret *generate_shared_secret(key_agreement *agreement) {
     if (agreement->private_key == NULL || agreement->peer_public_key == NULL) {
+        printf("One of the keys is null\n");
         return NULL;
     }
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_pkey(agreement->libctx, agreement->private_key, NULL);
     if (ctx == NULL) {
+        printf("ctx is null\n");
         return NULL;
     }
 
