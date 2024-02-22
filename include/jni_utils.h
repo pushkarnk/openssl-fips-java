@@ -8,3 +8,7 @@ jbyteArray byte_array_to_jbyteArray(JNIEnv *env, byte *array, int length);
 int array_length(JNIEnv *env, jbyteArray array);
 
 long get_long_field(JNIEnv *env, jobject this, const char *field_name);
+
+void copy_byte_array(JNIEnv *env, jbyteArray destination, byte *source, int length);
+
+jbyteArray new_byteArray(JNIEnv *env, byte *source, int length);

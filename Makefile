@@ -24,6 +24,10 @@ build:	java-build
 		src/com_canonical_openssl_OpenSSLCipherSpi.c -o build/bin/com_canonical_openssl_OpenSSLCipherSpi.o && \
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
 		src/com_canonical_openssl_OpenSSLKeyAgreementSpi.c -o build/bin/com_canonical_openssl_OpenSSLKeyAgreementSpi.o && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
+		src/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMDecapsulator.c -o build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMDecapsulator.o && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
+		src/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.c -o build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o build/bin/libjssl.so \
 		build/bin/evp_utils.o \
 		build/bin/jni_utils.o \
@@ -39,14 +43,22 @@ build:	java-build
 		build/bin/com_canonical_openssl_OpenSSLDrbg.o \
                 build/bin/com_canonical_openssl_OpenSSLCipherSpi.o \
 		build/bin/com_canonical_openssl_OpenSSLKeyAgreementSpi.o \
+		build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.o \
+		build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMDecapsulator.o \
 		-L/usr/local/lib64 -lcrypto -lssl
+
+test-java-ke: build
+	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/KeyEncapsulationTest.java && \
+	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java KeyEncapsulationTest
 
 test-java-ka: build
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/KeyAgreementTest.java && \
 	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java KeyAgreementTest
+
 test-java-cipher: build
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/CipherTest.java && \
 	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java CipherTest
+
 test-java-drbg: build
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/DrbgTest.java && \
 	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java DrbgTest 

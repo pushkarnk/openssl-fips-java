@@ -2,6 +2,7 @@
 #include <openssl/pem.h>
 #include <openssl/encoder.h>
 #include <stdlib.h>
+#include <openssl/err.h>
 
 # define TEST_ptr(a)          (a)
 # define TEST_true(a)         ((a) != 0)
@@ -48,7 +49,7 @@ kem_keyspec *init_kem_keyspec_with_key(EVP_PKEY *rsa_pub_key, EVP_PKEY *rsa_priv
     spec->secret = NULL;
     spec->wrapped_key = NULL;
     spec->secret_length = 0;
-    spec->wrapped_key_length =0;
+    spec->wrapped_key_length = 0;
     return spec;
 }
 
@@ -58,76 +59,109 @@ void free_kem_keyspec(kem_keyspec *spec) {
     free(spec);
 }
 
-int generate_and_wrap(kem_keyspec *spec) {
+EVP_PKEY_CTX *initialize_encapsulation(kem_keyspec *spec) {
     size_t wrapped_key_length = 0;
     size_t secret_length = 0;
 
     EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_pkey(spec->libctx, spec->public_key, NULL);
     if (ctx == NULL) {
-        return 1;
+        return NULL;
     }
 
     if (EVP_PKEY_encapsulate_init(ctx, NULL) <= 0) {
-        return 1;
+        return NULL;
     }
 
     if (EVP_PKEY_CTX_set_kem_op(ctx, "RSASVE") <= 0) {
-        return 1;
+        return NULL;
     }
 
     if (EVP_PKEY_encapsulate(ctx, NULL, &wrapped_key_length, NULL, &secret_length) <= 0) {
-        return 1;
+        return NULL;
     }
 
+    spec->secret_length = secret_length;
+    spec->wrapped_key_length = wrapped_key_length;
     spec->secret = (byte *)malloc(secret_length);
     spec->wrapped_key = (byte *)malloc(wrapped_key_length);
+
+    return ctx;
+}
+
+EVP_PKEY_CTX *initialize_decapsulation(kem_keyspec *spec) {
+    size_t secret_length = 0;
+    if (spec->wrapped_key == NULL || spec->wrapped_key_length <= 0) {
+        return NULL;
+    }
+
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_pkey(spec->libctx, spec->private_key, NULL);
+    if (ctx == NULL) {
+        return NULL;
+    }
+
+    if (EVP_PKEY_decapsulate_init(ctx, NULL) <= 0) {
+        return NULL;
+    }
+
+    if (EVP_PKEY_CTX_set_kem_op(ctx, "RSASVE") <= 0) {
+        return NULL;
+    }
+
+    if (EVP_PKEY_decapsulate(ctx, NULL, &secret_length, spec->wrapped_key, spec->wrapped_key_length) <= 0) {
+        return NULL;
+    }
+
+    spec->secret = OPENSSL_malloc(secret_length);
+    spec->secret_length = secret_length;
+
+    return ctx;
+}
+
+int get_secret_size(kem_keyspec *spec, int is_encap) {
+    if (is_encap)
+        initialize_encapsulation(spec);
+    else
+        initialize_decapsulation(spec);
+
+    return spec->secret_length;
+}
+
+int get_encapsulation_size(kem_keyspec *spec, int is_encap) {
+    if (is_encap)
+        initialize_encapsulation(spec);
+    else
+        initialize_decapsulation(spec);
+
+    return spec->wrapped_key_length;
+}
+
+
+int generate_and_wrap(kem_keyspec *spec) {
+    EVP_PKEY_CTX *ctx = initialize_encapsulation(spec);
 
     if (spec->secret == NULL || spec->wrapped_key == NULL) {
         return 1;
     }
 
-    if (EVP_PKEY_encapsulate(ctx, spec->wrapped_key, &wrapped_key_length, spec->secret, &secret_length) <= 0) {
+    if (EVP_PKEY_encapsulate(ctx, spec->wrapped_key, &(spec->wrapped_key_length), spec->secret, &(spec->secret_length)) <= 0) {
         return 1;
     }
-
-    spec->wrapped_key_length = wrapped_key_length;
-    spec->secret_length = secret_length;
     return 0;
 }
 
+int set_wrapped_key(kem_keyspec *spec, byte *wrapped_key, int length) {
+    spec->wrapped_key = wrapped_key;
+    spec->wrapped_key_length = length;
+}
+
 int unwrap(kem_keyspec *spec) {
-    size_t secret_length = 0;
-    if (spec->wrapped_key == NULL || spec->wrapped_key_length <= 0) {
+    EVP_PKEY_CTX *ctx = initialize_decapsulation(spec);
+    if (spec->secret == NULL) {
         return 1;
     }
 
-    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new_from_pkey(spec->libctx, spec->private_key, NULL);
-    if (ctx == NULL) {
+    if (EVP_PKEY_decapsulate(ctx, spec->secret, &spec->secret_length, spec->wrapped_key, spec->wrapped_key_length) <= 0) {
         return 1;
     }
-
-    if (EVP_PKEY_decapsulate_init(ctx, NULL) <= 0) {
-        return 1;
-    }
-
-    if (EVP_PKEY_CTX_set_kem_op(ctx, "RSASVE") <= 0) {
-        return 1;
-    }
-
-    if (EVP_PKEY_decapsulate(ctx, NULL, &secret_length, spec->wrapped_key, spec->wrapped_key_length) <= 0) {
-        return 1;
-    }
-
-    byte *secret = OPENSSL_malloc(secret_length);
-    if (secret == NULL) {
-        return 1;
-    }
-
-    if (EVP_PKEY_decapsulate(ctx, secret, &secret_length, spec->wrapped_key, spec->wrapped_key_length) <= 0) {
-        return 1;
-    }
-
-    spec->secret = secret;
-    spec->secret_length = secret_length;
     return 0;
 }

@@ -20,3 +20,13 @@ long get_long_field(JNIEnv *env, jobject this, const char *field_name) {
     jfieldID ctx_id = (*env)->GetFieldID(env, clazz, field_name, "J");
     jlong ctx_handle = (*env)->GetLongField(env, this, ctx_id);
 }
+
+void copy_byte_array(JNIEnv *env, jbyteArray destination, byte *source, int length) {
+    (*env)->SetByteArrayRegion(env, destination, 0, length, source);
+}
+
+jbyteArray new_byteArray(JNIEnv *env, byte *source, int length) {
+    jbyteArray retArray = (*env)->NewByteArray(env, length);
+    (*env)->SetByteArrayRegion(env, retArray, 0, length, source);
+    return retArray;
+}
