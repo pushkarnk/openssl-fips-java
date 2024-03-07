@@ -69,9 +69,18 @@ void test_cmac(OSSL_LIB_CTX *libctx) {
     free(params);
 }
 
-void test_hmac(OSSL_LIB_CTX *libctx) {
-    printf("Testing HMAC: ");
+void test_hmac_sha1(OSSL_LIB_CTX *libctx) {
+    printf("Testing HMAC with SHA-1: ");
     mac_params *params = init_mac_params(NULL, "SHA1", NULL, 0, 0); 
+    mac_context *ctx = mac_init("HMAC", key, 64, params);
+    run_test(ctx);
+    free_mac_context(ctx);
+    free(params);
+}
+
+void test_hmac_sha3(OSSL_LIB_CTX *libctx) {
+    printf("Testing HMAC with SHA3-512: ");
+    mac_params *params = init_mac_params(NULL, "SHA3-512", NULL, 0, 0);
     mac_context *ctx = mac_init("HMAC", key, 64, params);
     run_test(ctx);
     free_mac_context(ctx);
@@ -105,7 +114,8 @@ void test_kmac256(OSSL_LIB_CTX *libctx) {
 void test_mac_context_creation(OSSL_LIB_CTX *libctx) {
     test_cmac(libctx);
     test_gmac(libctx);
-    test_hmac(libctx);
+    test_hmac_sha1(libctx);
+    test_hmac_sha3(libctx);
     test_kmac128(libctx);
     test_kmac256(libctx);
 }    
