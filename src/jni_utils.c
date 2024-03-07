@@ -1,8 +1,18 @@
 #include <jni.h>
 #include "jssl.h"
 
-byte *jbyteArray_to_byte_array(JNIEnv *env, jbyteArray keyBytes) {
-    return (byte *) (*env)->GetByteArrayElements(env, keyBytes, NULL);
+char *jstring_to_char_array(JNIEnv *env, jstring string) {
+    // TODO: free this
+    if (string == NULL) {
+        return NULL;
+    }
+    return (char*)(*env)->GetStringUTFChars(env, string, 0);
+}
+
+byte *jbyteArray_to_byte_array(JNIEnv *env, jbyteArray bytes) {
+    if (bytes == NULL)
+        return NULL;
+    return (byte *) (*env)->GetByteArrayElements(env, bytes, NULL);
 }
 
 jbyteArray byte_array_to_jbyteArray(JNIEnv *env, byte *array, int length) {
@@ -12,6 +22,8 @@ jbyteArray byte_array_to_jbyteArray(JNIEnv *env, byte *array, int length) {
 }
 
 int array_length(JNIEnv *env, jbyteArray array) {
+    if (array == NULL)
+        return 0;
     return (*env)->GetArrayLength(env, array);
 }
 

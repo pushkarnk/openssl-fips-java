@@ -71,7 +71,7 @@ void test_cmac(OSSL_LIB_CTX *libctx) {
 
 void test_hmac(OSSL_LIB_CTX *libctx) {
     printf("Testing HMAC: ");
-    mac_params *params = init_mac_params(NULL, "SHA3-512", NULL, 0, 0); 
+    mac_params *params = init_mac_params(NULL, "SHA1", NULL, 0, 0); 
     mac_context *ctx = mac_init("HMAC", key, 64, params);
     run_test(ctx);
     free_mac_context(ctx);

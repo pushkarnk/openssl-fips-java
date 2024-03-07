@@ -4,6 +4,16 @@
 #include <openssl/err.h>
 #include <openssl/core_names.h>
 
+mac_params *init_mac_params(char *cipher, char *digest, byte *iv, size_t iv_length, size_t output_length) {
+    mac_params *new = (mac_params*)malloc(sizeof(mac_params));
+    new->cipher_name = cipher;
+    new->digest_name = digest;
+    new->iv = iv;
+    new->iv_length = iv_length;
+    new->output_length = output_length;
+    return new;
+}
+
 static void set_params(EVP_MAC_CTX *ctx, mac_params *params) {
     OSSL_PARAM _params[8];
     int n_params = 0;

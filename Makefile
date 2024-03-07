@@ -1,5 +1,5 @@
 JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
-LIBPATH=/home/pushkarnk/work/24/sprint4/6222/openssl-fips-jni-wrapper/build/bin/
+LIBPATH=${PWD}/build/bin/
 
 java-build: 
 	@mkdir -p build/classes && ${JAVA_HOME}/bin/javac -d build/classes src/java/com/canonical/openssl/*.java
@@ -28,24 +28,31 @@ build:	java-build
 		src/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMDecapsulator.c -o build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMDecapsulator.o && \
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
 		src/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.c -o build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.o && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
+		src/com_canonical_openssl_OpenSSLMACSpi.c -o build/bin/com_canonical_openssl_OpenSSLMACSpi.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o build/bin/libjssl.so \
 		build/bin/evp_utils.o \
 		build/bin/jni_utils.o \
 		build/bin/init.o   \
 		build/bin/drbg.o   \
 		build/bin/cipher.o \
-                build/bin/keyagreement.o \
-                build/bin/keyencapsulation.o \
-                build/bin/mac.o \
-                build/bin/md.o \
+		build/bin/keyagreement.o \
+		build/bin/keyencapsulation.o \
+		build/bin/mac.o \
+		build/bin/md.o \
 		build/bin/signature.o \
-                build/bin/kdf.o \
+		build/bin/kdf.o \
 		build/bin/com_canonical_openssl_OpenSSLDrbg.o \
-                build/bin/com_canonical_openssl_OpenSSLCipherSpi.o \
+		build/bin/com_canonical_openssl_OpenSSLCipherSpi.o \
 		build/bin/com_canonical_openssl_OpenSSLKeyAgreementSpi.o \
 		build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.o \
 		build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMDecapsulator.o \
+		build/bin/com_canonical_openssl_OpenSSLMACSpi.o \
 		-L/usr/local/lib64 -lcrypto -lssl
+
+test-java-mac: build
+	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/MacTest.java && \
+	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java MacTest
 
 test-java-ke: build
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/KeyEncapsulationTest.java && \
