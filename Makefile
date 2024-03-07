@@ -30,6 +30,8 @@ build:	java-build
 		src/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.c -o build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.o && \
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
 		src/com_canonical_openssl_OpenSSLMACSpi.c -o build/bin/com_canonical_openssl_OpenSSLMACSpi.o && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
+		src/com_canonical_openssl_OpenSSLMDSpi.c -o build/bin/com_canonical_openssl_OpenSSLMDSpi.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o build/bin/libjssl.so \
 		build/bin/evp_utils.o \
 		build/bin/jni_utils.o \
@@ -48,7 +50,12 @@ build:	java-build
 		build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMEncapsulator.o \
 		build/bin/com_canonical_openssl_OpenSSLKEMRSA_RSAKEMDecapsulator.o \
 		build/bin/com_canonical_openssl_OpenSSLMACSpi.o \
+		build/bin/com_canonical_openssl_OpenSSLMDSpi.o \
 		-L/usr/local/lib64 -lcrypto -lssl
+
+test-java-md: build
+	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/MDTest.java && \
+	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java MDTest
 
 test-java-mac: build
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/MacTest.java && \
