@@ -15,6 +15,13 @@ byte *jbyteArray_to_byte_array(JNIEnv *env, jbyteArray bytes) {
     return (byte *) (*env)->GetByteArrayElements(env, bytes, NULL);
 }
 
+char *jcharArray_to_char_array(JNIEnv *env, jcharArray chars) {
+    if (chars == NULL) {
+        return NULL;
+    }
+    return (char *) (*env)->GetCharArrayElements(env, chars, NULL);
+}
+
 jbyteArray byte_array_to_jbyteArray(JNIEnv *env, byte *array, int length) {
     jbyteArray ret_array = (*env)->NewByteArray(env, length);
     (*env)->SetByteArrayRegion(env, ret_array, 0, length, array);

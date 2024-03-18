@@ -14,3 +14,5 @@ void copy_byte_array(JNIEnv *env, jbyteArray destination, byte *source, int leng
 jbyteArray new_byteArray(JNIEnv *env, byte *source, int length);
 
 char* jstring_to_char_array(JNIEnv *env, jstring string);
+
+char *jcharArray_to_char_array(JNIEnv *env, jcharArray chars);

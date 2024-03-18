@@ -1,4 +1,4 @@
-#include "com_canononical_openssl_OpenSSLMDSpi.h"
+#include "com_canonical_openssl_OpenSSLMDSpi.h"
 #include "jssl.h"
 #include "md.h"
 #include "jni_utils.h"
