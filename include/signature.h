@@ -1,7 +1,7 @@
 #include "jssl.h"
 #include <openssl/evp.h>
 
-typedef enum sv_type { SV_RSA, SV_ED25519, SV_ED448 } sv_type;
+typedef enum sv_type { INVALID, SV_RSA, SV_ED25519, SV_ED448 } sv_type;
 typedef enum sv_state { UNINITIALISED, SIGN, VERIFY } sv_state;
 typedef enum sv_padding_mode { NONE, PSS } sv_padding_mode;
 

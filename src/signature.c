@@ -120,7 +120,8 @@ void free_sv_key(sv_key *key) {
     EVP_PKEY_CTX_free(key->ctx);
     free(key);
 }
-                                                                            void free_sv_context(sv_context *context) {
+
+void free_sv_context(sv_context *context) {
     EVP_MD_CTX_free(context->mctx);
     free(context);
 }

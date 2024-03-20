@@ -1,5 +1,5 @@
 JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
-LIBPATH=${PWD}/build/bin/
+LIBPATH=${PWD}/build/bin/:${PWD}/build/test
 
 java-build: 
 	@mkdir -p build/classes && ${JAVA_HOME}/bin/javac -d build/classes src/java/com/canonical/openssl/*.java
@@ -34,6 +34,8 @@ build:	java-build
 		src/com_canonical_openssl_OpenSSLMDSpi.c -o build/bin/com_canonical_openssl_OpenSSLMDSpi.o && \
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
 		src/com_canonical_openssl_OpenSSLPBKDF2Spi.c -o build/bin/com_canonical_openssl_OpenSSLPBKDF2Spi.o && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
+		src/com_canonical_openssl_OpenSSLSignatureSpi.c -o build/bin/com_canonical_openssl_OpenSSLSignatureSpi.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o build/bin/libjssl.so \
 		build/bin/evp_utils.o \
 		build/bin/jni_utils.o \
@@ -54,11 +56,28 @@ build:	java-build
 		build/bin/com_canonical_openssl_OpenSSLMACSpi.o \
 		build/bin/com_canonical_openssl_OpenSSLMDSpi.o \
 		build/bin/com_canonical_openssl_OpenSSLPBKDF2Spi.o \
+		build/bin/com_canonical_openssl_OpenSSLSignatureSpi.o \
 		-L/usr/local/lib64 -lcrypto -lssl
+
+build-test-lib:
+	@mkdir -p build/test && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC test/RSAKeyPairGenerator.c -o build/test/RSAKeyPairGenerator.o && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC test/EdDSAPrivateKey.c -o build/test/EdDSAPrivateKey.o && \
+	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC test/EdDSAPublicKey.c  -o build/test/EdDSAPublicKey.o && \
+	cc -shared -fPIC -Wl,-soname,libsigtest.so -o build/test/libsigtest.so \
+		build/test/RSAKeyPairGenerator.o \
+		build/test/EdDSAPrivateKey.o \
+		build/test/EdDSAPublicKey.o \
+		-L/usr/local/lib64 -L./build/bin -lcrypto -lssl -ljssl
+
+test-java-sv: build build-test-lib
+	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/SignatureTest.java && \
+	LD_LIBRARY_PATH=./build/bin:./build/test ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java SignatureTest
 
 test-java-kdf: build
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/PBKDFTest.java && \
 	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java PBKDFTest
+
 test-java-md: build
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/MDTest.java && \
 	LD_LIBRARY_PATH=./build/bin ${JAVA_HOME}/bin/java -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java MDTest

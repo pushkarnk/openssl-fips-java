@@ -18,7 +18,7 @@ public class PBKDFTest {
         OpenSSLPBKDF2Spi pbkdf = new OpenSSLPBKDF2Spi();
         SecretKey sk1 = pbkdf.engineGenerateSecret(keySpec);
         SecretKey sk2 = pbkdf.engineTranslateKey(sk1);
-        if (Arrays.equals(sk1.getEncoded(), sk2.getEncoded())) {
+        if (sk1.getEncoded().length != 0 && Arrays.equals(sk1.getEncoded(), sk2.getEncoded())) {
             System.out.println("PASSED");
         } else {
             System.out.println("FAILED");
