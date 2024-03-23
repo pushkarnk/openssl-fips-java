@@ -1,10 +1,91 @@
-import com.canonical.openssl.*;
+import com.canonical.openssl.drbg.OpenSSLDrbg;
 import java.util.Arrays;
 import java.security.*;
 import java.security.DrbgParameters;
 import java.security.DrbgParameters.Instantiation;
 import java.security.DrbgParameters.Capability;
 import java.lang.Long;
+
+class TestOpenSSLDrbg extends OpenSSLDrbg {
+
+    public TestOpenSSLDrbg(String name) {
+        super(name);
+    }
+
+    public TestOpenSSLDrbg(String name, SecureRandomParameters params) {
+        super(name, params);
+    }
+
+    @Override
+    public byte[] engineGenerateSeed(int numBytes) {
+        return super.engineGenerateSeed(numBytes);
+    }
+
+    @Override
+    public SecureRandomParameters engineGetParameters() {
+        return super.engineGetParameters();
+    }
+
+    @Override
+    public void engineNextBytes(byte[] bytes) {
+        super.engineNextBytes(bytes);
+    }
+
+    @Override
+    protected void engineNextBytes(byte[] bytes, SecureRandomParameters params) throws IllegalArgumentException {
+        super.engineNextBytes(bytes, params);
+    }
+
+    @Override
+    protected void engineReseed() {
+        super.engineReseed();
+    }
+
+    @Override
+    public void engineReseed(SecureRandomParameters params) {
+        super.engineReseed(params);
+    }
+
+    @Override
+    public void engineSetSeed(byte[] seed) {
+        super.engineSetSeed(seed);
+    }
+
+    @Override
+    public void engineSetSeed(long seed) {
+        super.engineSetSeed(seed);
+    }
+}
+
+class CtrDrbg extends TestOpenSSLDrbg {
+    public CtrDrbg() {
+        super("CTR-DRBG");
+    }
+
+    public CtrDrbg(SecureRandomParameters params) {
+        super("CTR-DRBG", params);
+    }
+}
+
+class HashDrbg extends TestOpenSSLDrbg {
+    public HashDrbg() {
+        super("HASH-DRBG");
+    }
+
+    public HashDrbg(SecureRandomParameters params) {
+        super("HASH-DRBG", params);
+    }
+}
+
+class HmacDrbg extends TestOpenSSLDrbg {
+    public HmacDrbg() {
+        super("HMAC-DRBG");
+    }
+
+    public HmacDrbg(SecureRandomParameters params) {
+        super("HMAC-DRBG", params);
+    }
+}
 
 /*
  * TODO: params have an impact on the random number generation, openssl crashes at times.
@@ -55,12 +136,12 @@ public class DrbgTest {
 
     private static void testDRBGCreation() {
         _IN("Test DRBG creation");
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
-        if (ctr.generateSeed(8).length == 8 &&
-            hmac.generateSeed(8).length == 8 &&
-            hash.generateSeed(8).length == 8) {
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
+        if (ctr.engineGenerateSeed(8).length == 8 &&
+            hmac.engineGenerateSeed(8).length == 8 &&
+            hash.engineGenerateSeed(8).length == 8) {
             _OUT("Passed");
         } else {
             _OUT("Failed");
@@ -70,12 +151,12 @@ public class DrbgTest {
     private static void testDRBGCreationWithParams() {
         _IN("Test DRBG creation with parameters");
         SecureRandomParameters params = DrbgParameters.instantiation(144, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes()); 
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
-        if (ctr.generateSeed(8).length == 8 &&
-            hmac.generateSeed(8).length == 8 &&
-            hash.generateSeed(8).length == 8) {
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
+        if (ctr.engineGenerateSeed(8).length == 8 &&
+            hmac.engineGenerateSeed(8).length == 8 &&
+            hash.engineGenerateSeed(8).length == 8) {
             _OUT("Passed");
         } else {
             _OUT("Failed");
@@ -84,12 +165,12 @@ public class DrbgTest {
 
     private static void testDRBGCreationGenerateSeed() {
         _IN("Test DRBG creation and seed generation");
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
-        if (checkRandomness(ctr.generateSeed(8), ctr.generateSeed(8)) &&
-            checkRandomness(hmac.generateSeed(16), hmac.generateSeed(16)) && 
-            checkRandomness(hash.generateSeed(32), hash.generateSeed(32))) {
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
+        if (checkRandomness(ctr.engineGenerateSeed(8), ctr.engineGenerateSeed(8)) &&
+            checkRandomness(hmac.engineGenerateSeed(16), hmac.engineGenerateSeed(16)) && 
+            checkRandomness(hash.engineGenerateSeed(32), hash.engineGenerateSeed(32))) {
             _OUT("Passed");
         } else {
             _OUT("Failed");
@@ -99,12 +180,12 @@ public class DrbgTest {
     private static void testDRBGCreationWithParamsGenerateSeed() {
         _IN("Test DRBG creation with parameters and seed generation");
         SecureRandomParameters params = DrbgParameters.instantiation(144, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
-        if (checkRandomness(ctr.generateSeed(8), ctr.generateSeed(8)) &&
-            checkRandomness(hmac.generateSeed(16), hmac.generateSeed(16)) &&
-            checkRandomness(hash.generateSeed(32), hash.generateSeed(32))) {
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
+        if (checkRandomness(ctr.engineGenerateSeed(8), ctr.engineGenerateSeed(8)) &&
+            checkRandomness(hmac.engineGenerateSeed(16), hmac.engineGenerateSeed(16)) &&
+            checkRandomness(hash.engineGenerateSeed(32), hash.engineGenerateSeed(32))) {
             _OUT("Passed");
         } else {
             _OUT("Failed");
@@ -114,24 +195,24 @@ public class DrbgTest {
     private static void testDRBGCreationNextBytes() {
         _IN("Test DRBG creation and next bytes");
         
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
 
         byte [] ctr1 = new byte[32];
         byte [] ctr2 = new byte[32];
-        ctr.nextBytes(ctr1);
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[64];
         byte [] hmac2 = new byte[64];
-        hmac.nextBytes(hmac1);
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[64];
         byte [] hash2 = new byte[64];
-        hash.nextBytes(hash1);
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineNextBytes(hash2);
  
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -145,25 +226,25 @@ public class DrbgTest {
     private static void testDRBGCreationWithParamsNextBytes() {
         _IN("Test DRBG creation with params and next bytes");
         SecureRandomParameters params = DrbgParameters.instantiation(256, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
 
         // TODO: size > 92 fails at openssl level, sometimes malloc() fails
         byte [] ctr1 = new byte[32];
         byte [] ctr2 = new byte[32];
-        ctr.nextBytes(ctr1);
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[64];
         byte [] hmac2 = new byte[64];
-        hmac.nextBytes(hmac1);
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[84];
         byte [] hash2 = new byte[84];
-        hash.nextBytes(hash1);
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineNextBytes(hash2);
     
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -177,25 +258,25 @@ public class DrbgTest {
     private static void testDRBGCreationNextBytesWithParams() {
        _IN("Test DRBG creation and next bytes with params");
         SecureRandomParameters nbParams = DrbgParameters.nextBytes(256, false, "123456".getBytes());
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
 
         // TODO: memory corruption for next byte array sizes >= 32
         byte [] ctr1 = new byte[8];
         byte [] ctr2 = new byte[8];
-        ctr.nextBytes(ctr1, nbParams);
-        ctr.nextBytes(ctr2, nbParams);
+        ctr.engineNextBytes(ctr1, nbParams);
+        ctr.engineNextBytes(ctr2, nbParams);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1, nbParams);
-        hmac.nextBytes(hmac2, nbParams);
+        hmac.engineNextBytes(hmac1, nbParams);
+        hmac.engineNextBytes(hmac2, nbParams);
 
         byte [] hash1 = new byte[32];
         byte [] hash2 = new byte[32];
-        hash.nextBytes(hash1, nbParams);
-        hash.nextBytes(hash2, nbParams);
+        hash.engineNextBytes(hash1, nbParams);
+        hash.engineNextBytes(hash2, nbParams);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -210,24 +291,24 @@ public class DrbgTest {
         _IN("Test DRBG creation with params, next bytes with params");
         SecureRandomParameters params = DrbgParameters.instantiation(128, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
         SecureRandomParameters nbParams = DrbgParameters.nextBytes(128, true, "ADDITIONALINPUT".getBytes());
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
 
         byte [] ctr1 = new byte[32];
         byte [] ctr2 = new byte[32];
-        ctr.nextBytes(ctr1, nbParams);
-        ctr.nextBytes(ctr2, nbParams);
+        ctr.engineNextBytes(ctr1, nbParams);
+        ctr.engineNextBytes(ctr2, nbParams);
 
         byte [] hmac1 = new byte[32];
         byte [] hmac2 = new byte[32];
-        hmac.nextBytes(hmac1, nbParams);
-        hmac.nextBytes(hmac2, nbParams);
+        hmac.engineNextBytes(hmac1, nbParams);
+        hmac.engineNextBytes(hmac2, nbParams);
 
         byte [] hash1 = new byte[32];
         byte [] hash2 = new byte[32];
-        hash.nextBytes(hash1, nbParams);
-        hash.nextBytes(hash2, nbParams);
+        hash.engineNextBytes(hash1, nbParams);
+        hash.engineNextBytes(hash2, nbParams);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -239,28 +320,28 @@ public class DrbgTest {
     }
 
     private static void testDRBGCreationReseed() {
-        _IN("Test DRBG creation and reseed");
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
+        _IN("Test DRBG creation and engineReseed");
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
 
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[32];
-        ctr.nextBytes(ctr1);
-        ctr.reseed();
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineReseed();
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.reseed();
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineReseed();
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.reseed();
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineReseed();
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -272,29 +353,29 @@ public class DrbgTest {
     }
 
     private static void testDRBGCreationWithParamsReseed() {
-        _IN("Test DRBG creation with params and reseed");
+        _IN("Test DRBG creation with params and engineReseed");
         SecureRandomParameters params = DrbgParameters.instantiation(128, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
 
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[16];
-        ctr.nextBytes(ctr1);
-        ctr.reseed();
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineReseed();
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.reseed();
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineReseed();
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.reseed();
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineReseed();
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -306,29 +387,29 @@ public class DrbgTest {
     }
 
     private static void testDRBGCreationReseedWithParams() {
-        _IN("Test DRBG creation and reseed with params");
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
+        _IN("Test DRBG creation and engineReseed with params");
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
 
         SecureRandomParameters rs = DrbgParameters.reseed(true, "ADDITIONALINPUT".getBytes());
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[16];
-        ctr.nextBytes(ctr1);
-        ctr.reseed(rs);
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineReseed(rs);
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.reseed(rs);
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineReseed(rs);
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.reseed(rs);
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineReseed(rs);
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -340,30 +421,30 @@ public class DrbgTest {
     }
 
     private static void testDRBGCreationWithParamsReseedWithParams() {
-        _IN("Test DRBG creation with params, reseed with params");
+        _IN("Test DRBG creation with params, engineReseed with params");
         SecureRandomParameters params = DrbgParameters.instantiation(128, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
 
         SecureRandomParameters rs = DrbgParameters.reseed(true, "ADDITIONALINPUT".getBytes());
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[16];
-        ctr.nextBytes(ctr1);
-        ctr.reseed(rs);
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineReseed(rs);
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.reseed(rs);
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineReseed(rs);
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.reseed(rs);
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineReseed(rs);
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -375,29 +456,29 @@ public class DrbgTest {
     }
 
     private static void testDRBGCreationSetSeedBytes() {
-        _IN("Test DRBG creation with params and reseed with bytes");
+        _IN("Test DRBG creation with params and engineReseed with bytes");
         SecureRandomParameters params = DrbgParameters.instantiation(128, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
 
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[16];
-        ctr.nextBytes(ctr1);
-        ctr.setSeed("NEWBYTES".getBytes());
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineSetSeed("NEWBYTES".getBytes());
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.setSeed("NEWBYTES".getBytes());
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineSetSeed("NEWBYTES".getBytes());
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.setSeed("NEWBYTES".getBytes());
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineSetSeed("NEWBYTES".getBytes());
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -409,29 +490,29 @@ public class DrbgTest {
     }
 
     private static void testDRBGCreationWithParamsSetSeedBytes() {
-        _IN("Test DRBG creation with params and reseed with bytes");
+        _IN("Test DRBG creation with params and engineReseed with bytes");
         SecureRandomParameters params = DrbgParameters.instantiation(128, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
 
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[16];
-        ctr.nextBytes(ctr1);
-        ctr.setSeed("NEWBYTES".getBytes());
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineSetSeed("NEWBYTES".getBytes());
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.setSeed("NEWBYTES".getBytes());
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineSetSeed("NEWBYTES".getBytes());
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.setSeed("NEWBYTES".getBytes());
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineSetSeed("NEWBYTES".getBytes());
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -443,28 +524,28 @@ public class DrbgTest {
     } 
 
     private static void testDRBGCreationSetSeedLong() {
-        _IN("Test DRBG creation with params and reseed with long");
-        SecureRandom ctr = new CtrDrbg();
-        SecureRandom hmac = new HmacDrbg();
-        SecureRandom hash = new HashDrbg();
+        _IN("Test DRBG creation with params and engineReseed with long");
+        TestOpenSSLDrbg ctr = new CtrDrbg();
+        TestOpenSSLDrbg hmac = new HmacDrbg();
+        TestOpenSSLDrbg hash = new HashDrbg();
 
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[16];
-        ctr.nextBytes(ctr1);
-        ctr.setSeed(Long.MAX_VALUE);
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineSetSeed(Long.MAX_VALUE);
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.setSeed(Long.MAX_VALUE);
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineSetSeed(Long.MAX_VALUE);
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.setSeed(Long.MAX_VALUE);
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineSetSeed(Long.MAX_VALUE);
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
@@ -476,29 +557,29 @@ public class DrbgTest {
     }
 
     private static void testDRBGCreationWithParamsSetSeedLong() {
-        _IN("Test DRBG creation with params and reseed with long");
+        _IN("Test DRBG creation with params and engineReseed with long");
         SecureRandomParameters params = DrbgParameters.instantiation(128, Capability.PR_AND_RESEED, "FIPSPROTOTYPE".getBytes());
-        SecureRandom ctr = new CtrDrbg(params);
-        SecureRandom hmac = new HmacDrbg(params);
-        SecureRandom hash = new HashDrbg(params);
+        TestOpenSSLDrbg ctr = new CtrDrbg(params);
+        TestOpenSSLDrbg hmac = new HmacDrbg(params);
+        TestOpenSSLDrbg hash = new HashDrbg(params);
 
         byte [] ctr1 = new byte[16];
         byte [] ctr2 = new byte[16];
-        ctr.nextBytes(ctr1);
-        ctr.setSeed(Long.MAX_VALUE);
-        ctr.nextBytes(ctr2);
+        ctr.engineNextBytes(ctr1);
+        ctr.engineSetSeed(Long.MAX_VALUE);
+        ctr.engineNextBytes(ctr2);
 
         byte [] hmac1 = new byte[16];
         byte [] hmac2 = new byte[16];
-        hmac.nextBytes(hmac1);
-        hmac.setSeed(Long.MAX_VALUE);
-        hmac.nextBytes(hmac2);
+        hmac.engineNextBytes(hmac1);
+        hmac.engineSetSeed(Long.MAX_VALUE);
+        hmac.engineNextBytes(hmac2);
 
         byte [] hash1 = new byte[16];
         byte [] hash2 = new byte[16];
-        hash.nextBytes(hash1);
-        hash.setSeed(Long.MAX_VALUE);
-        hash.nextBytes(hash2);
+        hash.engineNextBytes(hash1);
+        hash.engineSetSeed(Long.MAX_VALUE);
+        hash.engineNextBytes(hash2);
 
         if(checkRandomness(ctr1, ctr2)
            && checkRandomness(hmac1, hmac2)
