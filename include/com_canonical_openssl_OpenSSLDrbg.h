@@ -24,7 +24,7 @@ extern "C" {
  * Method:    init
  * Signature: (Ljava/lang/String;IZZ[B)J
  */
-JNIEXPORT jlong JNICALL Java_com_canonical_openssl_OpenSSLDrbg_init
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_init
   (JNIEnv *, jobject, jstring, jint, jboolean, jboolean, jbyteArray);
 
 /*
@@ -32,7 +32,7 @@ JNIEXPORT jlong JNICALL Java_com_canonical_openssl_OpenSSLDrbg_init
  * Method:    nextBytes0
  * Signature: ([BIZ[B)V
  */
-JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_nextBytes0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_nextBytes0
   (JNIEnv *, jobject, jbyteArray, jint, jboolean, jbyteArray);
 
 /*
@@ -40,7 +40,7 @@ JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_nextBytes0
  * Method:    reseed0
  * Signature: ([BZ[B)V
  */
-JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_reseed0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_reseed0
   (JNIEnv *, jobject, jbyteArray, jboolean, jbyteArray);
 
 /*
@@ -48,7 +48,7 @@ JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_reseed0
  * Method:    generateSeed0
  * Signature: (I)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_OpenSSLDrbg_generateSeed0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_generateSeed0
   (JNIEnv *, jobject, jint);
 
 #ifdef __cplusplus

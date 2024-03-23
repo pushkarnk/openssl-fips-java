@@ -1,8 +1,12 @@
 JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
 LIBPATH=${PWD}/build/bin/:${PWD}/build/test
 
-java-build: 
-	@mkdir -p build/classes && ${JAVA_HOME}/bin/javac -d build/classes src/java/com/canonical/openssl/*.java
+JAVA_SRC := src/java/com/canonical/openssl
+JAVA_SRC_DIRS := ${JAVA_SRC}/drbg ${JAVA_SRC}
+JAVA_FILES := $(wildcard $(addsuffix /*.java, $(JAVA_SRC_DIRS)))
+
+java-build: $(JAVA_FILES)
+	@mkdir -p build/classes && ${JAVA_HOME}/bin/javac -d build/classes $^
 
 build:	java-build
 	@mkdir -p build/bin && \

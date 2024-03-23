@@ -26,7 +26,7 @@ void populate_params(DRBGParams *params, int strength, int prediction_resistance
  * Method:    init
  * Signature: (Ljava/lang/String;IZZ[B)J
  */
-JNIEXPORT jlong JNICALL Java_com_canonical_openssl_OpenSSLDrbg_init
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_init
   (JNIEnv *env, jobject this, jstring name, jint strength, jboolean prediction_resistance, jboolean reseeding, jbyteArray personalization_string) {
     const char *name_string = (*env)->GetStringUTFChars(env, name, 0);
     byte *pstr_bytes = NULL;
@@ -55,7 +55,7 @@ JNIEXPORT jlong JNICALL Java_com_canonical_openssl_OpenSSLDrbg_init
  * Method:    nextBytes0
  * Signature: ([BIZ[B)V
  */
-JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_nextBytes0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_nextBytes0
   (JNIEnv *env, jobject this, jbyteArray out_bytes, jint strength, jboolean prediction_resistance , jbyteArray additional_input) {
 
     int additional_input_length = 0;
@@ -89,7 +89,7 @@ JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_nextBytes0
  * Method:    reseed0
  * Signature: ([BZ[B)V
  */
-JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_reseed0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_reseed0
   (JNIEnv *env, jobject this, jbyteArray in_bytes, jboolean reseeding, jbyteArray additional_input) {
     byte *ai_bytes = NULL;
     jsize ai_length = 0;
@@ -129,7 +129,7 @@ JNIEXPORT void JNICALL Java_com_canonical_openssl_OpenSSLDrbg_reseed0
  * Method:    generateSeed0
  * Signature: (I)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_OpenSSLDrbg_generateSeed0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_generateSeed0
   (JNIEnv *env, jobject this, jint num_bytes) {
 
     jclass clazz = (*env)->GetObjectClass(env, this);
