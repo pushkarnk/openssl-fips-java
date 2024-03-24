@@ -1,3 +1,5 @@
+package com.canonical.openssl.keyagreement;
+
 import java.security.Key;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
@@ -5,7 +7,7 @@ import javax.crypto.KeyAgreementSpi;
 import javax.crypto.SecretKey;
 import java.util.Base64;
 
-abstract public class OpenSSLKeyAgreementSpi extends KeyAgreementSpi {
+abstract public class OpenSSLKeyAgreement extends KeyAgreementSpi {
     static {
         System.loadLibrary("jssl");
     }
@@ -53,7 +55,7 @@ abstract public class OpenSSLKeyAgreementSpi extends KeyAgreementSpi {
         state = State.INITIALIZED;
     }
 
-    abstract long initialize(Key key);
+    protected abstract long initialize(Key key);
 
     protected native long engineInit0(int type, byte[] privateKey);
     native void engineDoPhase0(byte[] publicKey);
