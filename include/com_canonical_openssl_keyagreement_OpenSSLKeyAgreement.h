@@ -12,7 +12,7 @@ extern "C" {
  * Method:    engineInit0
  * Signature: (I[B)J
  */
-JNIEXPORT long JNICALL Java_OpenSSLKeyAgreementSpi_engineInit0
+JNIEXPORT long JNICALL Java_com_canonical_openssl_keyagreement_OpenSSLKeyAgreement_engineInit0
   (JNIEnv *, jobject, jint, jbyteArray);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT long JNICALL Java_OpenSSLKeyAgreementSpi_engineInit0
  * Method:    engineDoPhase0
  * Signature: ([B)V
  */
-JNIEXPORT void JNICALL Java_OpenSSLKeyAgreementSpi_engineDoPhase0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_keyagreement_OpenSSLKeyAgreement_engineDoPhase0
   (JNIEnv *, jobject, jbyteArray);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT void JNICALL Java_OpenSSLKeyAgreementSpi_engineDoPhase0
  * Method:    engineGenerateSecret0
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLKeyAgreementSpi_engineGenerateSecret0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_keyagreement_OpenSSLKeyAgreement_engineGenerateSecret0
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus
