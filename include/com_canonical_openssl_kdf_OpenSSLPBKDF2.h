@@ -12,7 +12,7 @@ extern "C" {
  * Method:    generateKey0
  * Signature: ([C[BI)LOpenSSLPBKDF2Spi/PBKDF2SecretKey;
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLPBKDF2Spi_generateSecret0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_kdf_OpenSSLPBKDF2_generateSecret0
   (JNIEnv *, jobject, jcharArray, jbyteArray, jint);
 
 #ifdef __cplusplus

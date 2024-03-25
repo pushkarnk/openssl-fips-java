@@ -1,3 +1,5 @@
+package com.canonical.openssl.kdf;
+
 import java.security.spec.KeySpec;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -22,7 +24,7 @@ import javax.crypto.SecretKeyFactorySpi;
  * can be represented by class PBEKeySpec. As a result, only PBKDF2
  * is implemented in this prototype.
  */
-public class OpenSSLPBKDF2Spi extends SecretKeyFactorySpi {
+public class OpenSSLPBKDF2 extends SecretKeyFactorySpi {
 
     static {
         System.loadLibrary("jssl");
@@ -52,7 +54,6 @@ public class OpenSSLPBKDF2Spi extends SecretKeyFactorySpi {
         public byte[] getSalt() {
             return salt;
         }
-
 
         public void setEncoded(byte[] keyBytes) {
             this.keyBytes = keyBytes;
