@@ -1,6 +1,8 @@
-class OpenSSLKMAC128Spi extends OpenSSLMACSpi {
+package com.canonical.openssl.mac;
+
+public final class HMACwithSHA1 extends OpenSSLMAC {
     protected String getAlgorithm() {
-        return "KMAC-128";
+        return "HMAC";
     }
 
     protected String getCipherType() {
@@ -8,7 +10,7 @@ class OpenSSLKMAC128Spi extends OpenSSLMACSpi {
     }
 
     protected String getDigestType() {
-        return null;
+        return "SHA1";
     }
 
     protected byte[] getIV() {

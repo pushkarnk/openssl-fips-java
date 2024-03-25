@@ -1,7 +1,11 @@
+import com.canonical.openssl.mac.*;
 import java.lang.FunctionalInterface;
 import java.util.Arrays;
 import java.util.function.*;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
+import java.security.spec.AlgorithmParameterSpec;
+import java.nio.ByteBuffer;
 
 @FunctionalInterface
 interface TriFunction<A, B, C, D> {
@@ -31,13 +35,13 @@ public class MacTest {
        She would never be lonely again, never miss the lack of intimate friends.
        Books became her friends and there was one for every mood""".getBytes();
 
-    private static TriFunction<OpenSSLMACSpi, SecretKeySpec, byte[], byte[]> macCompute = (mac, keySpec, input) -> {
+    private static TriFunction<TestOpenSSLMAC, SecretKeySpec, byte[], byte[]> macCompute = (mac, keySpec, input) -> {
         mac.engineInit(keySpec, null);
         mac.engineUpdate(input, 0, input.length);
         return mac.engineDoFinal();
     };
 
-    private static void runTest(String name, SecretKeySpec keySpec, Class<? extends OpenSSLMACSpi> macClass) throws Exception {
+    private static void runTest(String name, SecretKeySpec keySpec, Class<? extends TestOpenSSLMAC> macClass) throws Exception {
         System.out.print("Testing " + name + ": ");
         byte[] output1 = macCompute.apply(macClass.newInstance(), keySpec, input);
         byte[] output2 = macCompute.apply(macClass.newInstance(), keySpec, input);
@@ -52,38 +56,38 @@ public class MacTest {
     private static void testCMAC_AES() throws Exception {
         runTest("CMAC[Cipher: AES-256-CBC]",
             new SecretKeySpec(Arrays.copyOfRange(key, 0, 32), "AES"),
-            OpenSSLCMACAesSpi.class);
+            TestCMACwithAes256CBC.class);
 
     }
 
     private static void testGMAC_AES() throws Exception {
         runTest("GMAC[Cipher: AES-128-GCM]",
             new SecretKeySpec(Arrays.copyOfRange(key, 0, 16), "AES"),
-            OpenSSLGMACAesSpi.class);
+            TestGMACWithAes128GCM.class);
     }
 
     private static void testHMAC_SHA1() throws Exception {
         runTest("HMAC[Digest: SHA1]",
             new SecretKeySpec(Arrays.copyOfRange(key, 0, 64), "HMAC"),
-            OpenSSLHMACSHA1Spi.class); 
+            TestHMACwithSHA1.class);
     }
 
     private static void testHMAC_SHA3_512() throws Exception {
         runTest("HMAC[Digest: SHA3-512]",
             new SecretKeySpec(Arrays.copyOfRange(key, 0, 64), "HMAC"),
-            OpenSSLHMACSHA3512Spi.class);
+            TestHMACwithSHA3_512.class);
     }
 
     private static void testKMAC_128() throws Exception {
         runTest("KMAC-128",
             new SecretKeySpec(Arrays.copyOfRange(key, 0, 4), "KMAC-128"),
-            OpenSSLKMAC128Spi.class);
+            TestKMAC128.class);
     }
 
     private static void testKMAC_256() throws Exception {
         runTest("KMAC-256",
             new SecretKeySpec(Arrays.copyOfRange(key, 0, 32), "KMAC-256"),
-            OpenSSLKMAC256Spi.class);
+            TestKMAC256.class);
     }
  
     public static void main(String[] args) throws Exception {
@@ -93,5 +97,159 @@ public class MacTest {
         testHMAC_SHA3_512();
         testKMAC_128();
         testKMAC_256(); 
+    }
+}
+
+abstract class TestOpenSSLMAC extends OpenSSLMAC {
+    @Override
+    protected byte[] engineDoFinal() {
+        return super.engineDoFinal();
+    }
+
+    @Override
+    protected int engineGetMacLength() {
+        return super.engineGetMacLength();
+    }
+
+    @Override
+    protected void engineInit(Key key, AlgorithmParameterSpec params) {
+        super.engineInit(key, params);
+    }
+
+    @Override
+    protected void engineReset() {
+        super.engineReset();
+    }
+
+    @Override
+    protected void engineUpdate(byte input) {
+        super.engineUpdate(input);
+    }
+
+    @Override
+    protected void engineUpdate(byte[] input, int offset, int len) {
+        super.engineUpdate(input, offset, len);
+    }
+
+    @Override
+    protected void engineUpdate(ByteBuffer input) {
+        super.engineUpdate(input);
+    }
+
+    protected abstract String getAlgorithm();
+    protected abstract String getCipherType();
+    protected abstract String getDigestType();
+    protected abstract byte[] getIV();
+
+}
+
+final class TestCMACwithAes256CBC extends TestOpenSSLMAC {
+    protected String getAlgorithm() {
+        return "CMAC";
+    }
+
+    protected String getCipherType() {
+        return "AES-256-CBC";
+    }
+
+    protected String getDigestType() {
+        return null;
+    }
+
+    protected byte[] getIV() {
+        return null;
+    }
+}
+
+final class TestGMACWithAes128GCM extends TestOpenSSLMAC {
+    protected String getAlgorithm() {
+        return "GMAC";
+    }
+
+    protected String getCipherType() {
+        return "AES-128-GCM";
+    }
+
+    protected String getDigestType() {
+        return null;
+    }
+
+    // TODO: a random IV?
+    protected byte[] getIV() {
+        return new byte[] { (byte)0xe0, (byte)0xe0, (byte)0x0f, (byte)0x19,
+                            (byte)0xfe, (byte)0xd7, (byte)0xba, (byte)0x01,
+                            (byte)0x36, (byte)0xa7, (byte)0x97, (byte)0xf3 };
+    }
+}
+
+final class TestHMACwithSHA1 extends TestOpenSSLMAC {
+    protected String getAlgorithm() {
+        return "HMAC";
+    }
+
+    protected String getCipherType() {
+        return null;
+    }
+
+    protected String getDigestType() {
+        return "SHA1";
+    }
+
+    protected byte[] getIV() {
+        return null;
+    }
+}
+
+final class TestHMACwithSHA3_512 extends TestOpenSSLMAC {
+    protected String getAlgorithm() {
+        return "HMAC";
+    }
+
+    protected String getCipherType() {
+        return null;
+    }
+
+    protected String getDigestType() {
+        return "SHA3-512";
+    }
+
+    protected byte[] getIV() {
+        return null;
+    }
+}
+
+final class TestKMAC128 extends TestOpenSSLMAC {
+    protected String getAlgorithm() {
+        return "KMAC-128";
+    }
+
+    protected String getCipherType() {
+        return null;
+    }
+
+    protected String getDigestType() {
+        return null;
+    }
+
+    protected byte[] getIV() {
+        return null;
+    }
+}
+
+final class TestKMAC256 extends TestOpenSSLMAC {
+    protected String getAlgorithm() {
+        return "KMAC-256";
+    }
+
+    protected String getCipherType() {
+        return null;
+    }
+
+    protected String getDigestType() {
+        return null;
+    }
+
+    protected byte[] getIV() {
+        return null;
     }
 }

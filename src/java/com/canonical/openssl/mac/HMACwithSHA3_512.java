@@ -1,4 +1,6 @@
-class OpenSSLHMACSHA3512Spi extends OpenSSLMACSpi {
+package com.canonical.openssl.mac;
+
+public final class HMACwithSHA3_512 extends OpenSSLMAC {
     protected String getAlgorithm() {
         return "HMAC";
     }
