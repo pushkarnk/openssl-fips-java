@@ -1,6 +1,6 @@
 #include "jni_utils.h" 
 #include "kdf.h"
-#include "com_canonical_openssl_OpenSSLPBKDF2Spi.h"
+#include "com_canonical_openssl_kdf_OpenSSLPBKDF2.h"
 
 #define MAX_KEY_SIZE 64
 extern OSSL_LIB_CTX *global_libctx;
@@ -9,7 +9,7 @@ extern OSSL_LIB_CTX *global_libctx;
  * Method:    generateKey0
  * Signature: ([C[BI)LOpenSSLPBKDF2Spi/PBKDF2SecretKey;
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLPBKDF2Spi_generateSecret0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_kdf_OpenSSLPBKDF2_generateSecret0
   (JNIEnv *env, jobject this, jcharArray password, jbyteArray salt, jint iteration_count) {
     int password_length = array_length(env, password);
     int salt_length = array_length(env, salt);
