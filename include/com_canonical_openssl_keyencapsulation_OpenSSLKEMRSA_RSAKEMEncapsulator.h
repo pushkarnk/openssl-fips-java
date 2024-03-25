@@ -12,7 +12,7 @@ extern "C" {
  * Method:    encapsulatorInit0
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLKEMRSA_00024RSAKEMEncapsulator_encapsulatorInit0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMEncapsulator_encapsulatorInit0
   (JNIEnv *, jobject, jbyteArray);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLKEMRSA_00024RSAKEMEncapsulator_encapsulatorI
  * Method:    engineEncapsulate0
  * Signature: ()Ljavax/crypto/KEM/Encapsulated;
  */
-JNIEXPORT void JNICALL Java_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineEncapsulate0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineEncapsulate0
   (JNIEnv *, jobject, jbyteArray, jbyteArray);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT void JNICALL Java_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineEncapsul
  * Method:    engineSecretSize0
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineSecretSize0
+JNIEXPORT jint JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineSecretSize0
   (JNIEnv *, jobject);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT jint JNICALL Java_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineSecretSi
  * Method:    engineEncapsulationSize0
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineEncapsulationSize0
+JNIEXPORT jint JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMEncapsulator_engineEncapsulationSize0
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

@@ -1,3 +1,5 @@
+package com.canonical.openssl.keyencapsulation;
+
 import javax.crypto.DecapsulateException;
 import javax.crypto.KEM;
 import javax.crypto.KEM.Encapsulated;
@@ -15,7 +17,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import javax.crypto.spec.SecretKeySpec;
 
-public class OpenSSLKEMRSA implements KEMSpi {
+final public class OpenSSLKEMRSA implements KEMSpi {
 
     static {
         System.loadLibrary("jssl");
@@ -40,7 +42,7 @@ public class OpenSSLKEMRSA implements KEMSpi {
             throw new InvalidKeyException("Private key is not an RSAPrivateKey"); 
     }
 
-    class RSAKEMEncapsulator implements KEMSpi.EncapsulatorSpi {
+    final public class RSAKEMEncapsulator implements KEMSpi.EncapsulatorSpi {
         long nativeHandle = 0;
         public RSAKEMEncapsulator(PublicKey key) {
             nativeHandle = encapsulatorInit0(key.getEncoded());
@@ -74,7 +76,7 @@ public class OpenSSLKEMRSA implements KEMSpi {
         private native int engineEncapsulationSize0();
     }
 
-    class RSAKEMDecapsulator implements KEMSpi.DecapsulatorSpi {
+    final public class RSAKEMDecapsulator implements KEMSpi.DecapsulatorSpi {
         long nativeHandle = 0;
 
         public RSAKEMDecapsulator(PrivateKey key) {

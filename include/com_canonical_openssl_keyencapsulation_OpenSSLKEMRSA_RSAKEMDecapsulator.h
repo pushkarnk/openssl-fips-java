@@ -12,7 +12,7 @@ extern "C" {
  * Method:    decapsulatorInit0
  * Signature: ([B)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLKEMRSA_00024RSAKEMDecapsulator_decapsulatorInit0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMDecapsulator_decapsulatorInit0
   (JNIEnv *, jobject, jbyteArray);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLKEMRSA_00024RSAKEMDecapsulator_decapsulatorI
  * Method:    engineDecapsulate0
  * Signature: ([B)[B;
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineDecapsulate0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineDecapsulate0
   (JNIEnv *, jobject, jbyteArray);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jbyteArray JNICALL Java_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineDe
  * Method:    engineSecretSize0
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineSecretSize0
+JNIEXPORT jint JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineSecretSize0
   (JNIEnv *, jobject);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT jint JNICALL Java_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineSecretSi
  * Method:    engineEncapsulationSize0
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineEncapsulationSize0
+JNIEXPORT jint JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMDecapsulator_engineEncapsulationSize0
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus
