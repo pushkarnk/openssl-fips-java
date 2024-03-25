@@ -12,7 +12,7 @@ extern "C" {
  * Method:    doInit0
  * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[BI[B)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLMACSpi_doInit0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_mac_OpenSSLMAC_doInit0
   (JNIEnv *, jobject, jstring, jstring, jstring, jbyteArray, jint, jbyteArray);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLMACSpi_doInit0
  * Method:    getMacLength
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_OpenSSLMACSpi_getMacLength
+JNIEXPORT jint JNICALL Java_com_canonical_openssl_mac_OpenSSLMAC_getMacLength
   (JNIEnv *, jobject);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jint JNICALL Java_OpenSSLMACSpi_getMacLength
  * Method:    doUpdate0
  * Signature: ([B)V
  */
-JNIEXPORT void JNICALL Java_OpenSSLMACSpi_doUpdate0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_mac_OpenSSLMAC_doUpdate0
   (JNIEnv *, jobject, jbyteArray);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT void JNICALL Java_OpenSSLMACSpi_doUpdate0
  * Method:    doFinal0
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLMACSpi_doFinal0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_mac_OpenSSLMAC_doFinal0
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

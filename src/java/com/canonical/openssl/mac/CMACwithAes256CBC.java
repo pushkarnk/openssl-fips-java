@@ -1,4 +1,6 @@
-class OpenSSLCMACAesSpi extends OpenSSLMACSpi {
+package com.canonical.openssl.mac;
+
+public final class CMACwithAes256CBC extends OpenSSLMAC {
     protected String getAlgorithm() {
         return "CMAC";
     } 

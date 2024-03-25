@@ -2,7 +2,7 @@ JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
 LIBPATH=${PWD}/build/bin/:${PWD}/build/test
 
 JAVA_SRC := src/java/com/canonical/openssl
-JAVA_SRC_DIRS := ${JAVA_SRC} ${JAVA_SRC}/drbg ${JAVA_SRC}/keyagreement ${JAVA_SRC}/keyencapsulation
+JAVA_SRC_DIRS := ${JAVA_SRC} ${JAVA_SRC}/drbg ${JAVA_SRC}/keyagreement ${JAVA_SRC}/keyencapsulationi ${JAVA_SRC}/mac
 JAVA_FILES := $(wildcard $(addsuffix /*.java, $(JAVA_SRC_DIRS)))
 
 java-build: $(JAVA_FILES)
@@ -33,7 +33,7 @@ build:	java-build
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
 		src/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMEncapsulator.c -o build/bin/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMEncapsulator.o && \
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
-		src/com_canonical_openssl_OpenSSLMACSpi.c -o build/bin/com_canonical_openssl_OpenSSLMACSpi.o && \
+		src/com_canonical_openssl_mac_OpenSSLMAC.c -o build/bin/com_canonical_openssl_mac_OpenSSLMACSpi.o && \
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
 		src/com_canonical_openssl_OpenSSLMDSpi.c -o build/bin/com_canonical_openssl_OpenSSLMDSpi.o && \
 	cc -I./include -I${JAVA_HOME}/include/linux/ -I${JAVA_HOME}/include/ -c -fPIC \
@@ -57,7 +57,7 @@ build:	java-build
 		build/bin/com_canonical_openssl_keyagreement_OpenSSLKeyAgreement.o \
 		build/bin/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMEncapsulator.o \
 		build/bin/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMDecapsulator.o \
-		build/bin/com_canonical_openssl_OpenSSLMACSpi.o \
+		build/bin/com_canonical_openssl_mac_OpenSSLMACSpi.o \
 		build/bin/com_canonical_openssl_OpenSSLMDSpi.o \
 		build/bin/com_canonical_openssl_OpenSSLPBKDF2Spi.o \
 		build/bin/com_canonical_openssl_OpenSSLSignatureSpi.o \

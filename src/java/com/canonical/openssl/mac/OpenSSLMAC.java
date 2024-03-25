@@ -1,3 +1,5 @@
+package com.canonical.openssl.mac;
+
 import java.nio.ByteBuffer;
 import java.security.Key;
 import java.util.Arrays;
@@ -5,7 +7,7 @@ import javax.crypto.MacSpi;
 import java.security.spec.AlgorithmParameterSpec;
 import javax.xml.crypto.dsig.spec.HMACParameterSpec;
 
-public abstract class OpenSSLMACSpi extends MacSpi {
+public abstract class OpenSSLMAC extends MacSpi {
 
     static {
         System.loadLibrary("jssl");
@@ -64,9 +66,9 @@ public abstract class OpenSSLMACSpi extends MacSpi {
         doUpdate0(input);
     }
 
-    private boolean isHMAC(OpenSSLMACSpi object) {
-        return object instanceof OpenSSLHMACSHA1Spi
-            || object instanceof OpenSSLHMACSHA3512Spi; 
+    private boolean isHMAC(OpenSSLMAC object) {
+        return object instanceof HMACwithSHA1
+            || object instanceof HMACwithSHA3_512; 
     }
 
     native long doInit0(String algo, String cipher, String digest, byte[] iv, int outLen, byte[] key);
