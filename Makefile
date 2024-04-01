@@ -2,7 +2,7 @@ JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
 
 JAVA_SRC := src/java/com/canonical/openssl
 JAVA_SRC_DIRS := ${JAVA_SRC} ${JAVA_SRC}/drbg ${JAVA_SRC}/keyagreement ${JAVA_SRC}/keyencapsulation ${JAVA_SRC}/mac
-JAVA_SRC_DIRS += ${JAVA_SRC}/kdf ${JAVA_SRC}/md
+JAVA_SRC_DIRS += ${JAVA_SRC}/kdf ${JAVA_SRC}/md ${JAVA_SRC}/signature ${JAVA_SRC}/key
 
 JAVA_FILES := $(wildcard $(addsuffix /*.java, $(JAVA_SRC_DIRS)))
 
@@ -51,8 +51,8 @@ build:	java-build
 		-o ${BIN}/com_canonical_openssl_OpenSSLMD.o && \
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_kdf_OpenSSLPBKDF2.c \
 		-o ${BIN}/com_canonical_openssl_kdf_OpenSSLPBKDF2.o && \
-	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_OpenSSLSignatureSpi.c \
-		-o ${BIN}/com_canonical_openssl_OpenSSLSignatureSpi.o && \
+	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_OpenSSLSignature.c \
+		-o ${BIN}/com_canonical_openssl_OpenSSLSignature.o && \
 	cc -shared -fPIC -Wl,-soname,libjssl.so -o ${BIN}/libjssl.so \
 		${BIN}/evp_utils.o \
 		${BIN}/jni_utils.o \
@@ -73,7 +73,7 @@ build:	java-build
 		${BIN}/com_canonical_openssl_mac_OpenSSLMACSpi.o \
 		${BIN}/com_canonical_openssl_OpenSSLMD.o \
 		${BIN}/com_canonical_openssl_kdf_OpenSSLPBKDF2.o \
-		${BIN}/com_canonical_openssl_OpenSSLSignatureSpi.o \
+		${BIN}/com_canonical_openssl_OpenSSLSignature.o \
 		-L/usr/local/lib64 -lcrypto -lssl
 
 build-test-lib:

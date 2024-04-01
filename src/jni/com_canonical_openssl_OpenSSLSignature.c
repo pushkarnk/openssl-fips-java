@@ -1,5 +1,5 @@
 #include "jssl.h"
-#include "com_canonical_openssl_OpenSSLSignatureSpi.h"
+#include "com_canonical_openssl_OpenSSLSignature.h"
 #include "signature.h"
 #include "evp_utils.h"
 #include "jni_utils.h"
@@ -37,7 +37,7 @@ jlong init_signature(JNIEnv *env, jobject this, jstring sig_name, jobject jkey, 
  * Method:    engineSignInit
  * Signature: (Ljava/lang/String;LOpenSSLPublicKey;LOpenSSLSignatureSpi/Params;)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitSign0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineInitSign0
   (JNIEnv *env, jobject this, jstring sig_name, jobject private_key, jobject params) {
     return init_signature(env, this, sig_name, private_key, params, SIGN);
 }
@@ -48,7 +48,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitSign0
  * Method:    engineVerifyInit
  * Signature: (Ljava/lang/String;LOpenSSLPrivateKey;LOpenSSLSignatureSpi/Params;)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitVerify0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineInitVerify0
   (JNIEnv *env, jobject this, jstring sig_name, jobject public_key, jobject params) {
     return init_signature(env, this, sig_name, public_key, params, VERIFY);
 }
@@ -58,7 +58,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitVerify0
  * Method:    engineUpdate0
  * Signature: ([BII)V
  */
-JNIEXPORT void JNICALL Java_OpenSSLSignatureSpi_engineUpdate0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineUpdate0
   (JNIEnv *env, jobject this, jbyteArray bytes, jint offset, jint length) {
     sv_context *ctx = (sv_context*)get_long_field(env, this, "nativeHandle");
     byte *to_update = (byte*)malloc(length);
@@ -71,7 +71,7 @@ JNIEXPORT void JNICALL Java_OpenSSLSignatureSpi_engineUpdate0
  * Method:    engineSign0
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLSignatureSpi_engineSign0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineSign0
   (JNIEnv *env, jobject this) {
     sv_context *ctx = (sv_context*)get_long_field(env, this, "nativeHandle");
     size_t sig_length = 0;
@@ -94,7 +94,7 @@ JNIEXPORT jbyteArray JNICALL Java_OpenSSLSignatureSpi_engineSign0
  * Method:    engineVerify0
  * Signature: ([BII)Z
  */
-JNIEXPORT jboolean JNICALL Java_OpenSSLSignatureSpi_engineVerify0
+JNIEXPORT jboolean JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineVerify0
   (JNIEnv *env, jobject this, jbyteArray sig_bytes, jint offset, jint length) {
     sv_context *ctx = (sv_context*)get_long_field(env, this, "nativeHandle");
     byte *signature = (byte*)malloc(length);
