@@ -1,19 +1,19 @@
 #include <jni.h>
 #include "jssl.h"
 #include "cipher.h"
-#include "com_canonical_openssl_OpenSSLCipherSpi.h"
+#include "com_canonical_openssl_OpenSSLCipher.h"
 
 #define LARGE_SIZE 1024
 extern OSSL_LIB_CTX *global_libctx;
 
-JNIEXPORT jlong JNICALL Java_OpenSSLCipherSpi_createContext0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_createContext0
   (JNIEnv *env, jobject this, jstring name, jstring padding) {
      const char *namestr = (*env)->GetStringUTFChars(env, name, 0);
      const char *paddingstr = (*env)->GetStringUTFChars(env, padding, 0);
      return (jlong) create_cipher_context(global_libctx, namestr, paddingstr); 
 }
 
-JNIEXPORT void JNICALL Java_OpenSSLCipherSpi_doInit0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_doInit0
   (JNIEnv *env, jobject this, jbyteArray input, jint offset, jint length, jbyteArray key, jbyteArray iv, jint opmode) {
 
     jclass clazz = (*env)->GetObjectClass(env, this);
@@ -37,7 +37,7 @@ JNIEXPORT void JNICALL Java_OpenSSLCipherSpi_doInit0
     }
 }
 
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doUpdate0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_doUpdate0
   (JNIEnv *env, jobject this, jbyteArray input, jint offset, jint length) {
     byte output_bytes[1024];
     int output_length = 0;
@@ -56,7 +56,7 @@ JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doUpdate0
     return ret_array;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doFinal0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_doFinal0
   (JNIEnv *env, jobject this, jbyteArray output, jint length) {
     int templen = 0;
 

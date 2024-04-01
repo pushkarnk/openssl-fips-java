@@ -12,7 +12,7 @@ extern "C" {
  * Method:    createContext0
  * Signature: (Ljava/lang/String;Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLCipherSpi_createContext0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_createContext0
   (JNIEnv *, jobject, jstring, jstring);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLCipherSpi_createContext0
  * Method:    doInit0
  * Signature: ([BII[B[BI)V
  */
-JNIEXPORT void JNICALL Java_OpenSSLCipherSpi_doInit0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_doInit0
   (JNIEnv *, jobject, jbyteArray, jint, jint, jbyteArray, jbyteArray, jint);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT void JNICALL Java_OpenSSLCipherSpi_doInit0
  * Method:    doUpdate0
  * Signature: ([BII)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doUpdate0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_doUpdate0
   (JNIEnv *, jobject, jbyteArray, jint, jint);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doUpdate0
  * Method:    doFinal0
  * Signature: ([BI)[B
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLCipherSpi_doFinal0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_cipher_OpenSSLCipher_doFinal0
   (JNIEnv *, jobject, jbyteArray, jint);
 
 #ifdef __cplusplus

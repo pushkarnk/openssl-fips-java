@@ -1,3 +1,5 @@
+package com.canonical.openssl.cipher;
+
 import javax.crypto.CipherSpi;
 import javax.crypto.Cipher;
 import java.security.Key;
@@ -9,7 +11,7 @@ import javax.crypto.ShortBufferException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.BadPaddingException;
 
-abstract public class OpenSSLCipherSpi extends CipherSpi {
+abstract public class OpenSSLCipher extends CipherSpi {
 
     static {
         System.loadLibrary("jssl");
@@ -30,7 +32,7 @@ abstract public class OpenSSLCipherSpi extends CipherSpi {
     int opmode = UNDECIDED;
     boolean firstUpdate = true;
  
-    OpenSSLCipherSpi(String nameKeySizeAndMode, String padding) {
+    protected OpenSSLCipher(String nameKeySizeAndMode, String padding) {
         this.name = name;
         this.mode = nameKeySizeAndMode.split("-")[2];
         this.padding = padding;

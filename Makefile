@@ -2,7 +2,7 @@ JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
 
 JAVA_SRC := src/java/com/canonical/openssl
 JAVA_SRC_DIRS := ${JAVA_SRC} ${JAVA_SRC}/drbg ${JAVA_SRC}/keyagreement ${JAVA_SRC}/keyencapsulation ${JAVA_SRC}/mac
-JAVA_SRC_DIRS += ${JAVA_SRC}/kdf ${JAVA_SRC}/md ${JAVA_SRC}/signature ${JAVA_SRC}/key
+JAVA_SRC_DIRS += ${JAVA_SRC}/kdf ${JAVA_SRC}/md ${JAVA_SRC}/signature ${JAVA_SRC}/key ${JAVA_SRC}/cipher
 
 JAVA_FILES := $(wildcard $(addsuffix /*.java, $(JAVA_SRC_DIRS)))
 
@@ -19,10 +19,13 @@ CCFLAGS := ${INCLUDE_HEADERS} -c -fPIC
 BIN := ${PWD}/build/bin
 LIBPATH := ${BIN}:${PWD}/build/test
 
+gen-code:
+	@sh ${PWD}/gen/gen-classes.sh
+
 java-build: $(JAVA_FILES)
 	@mkdir -p build/classes && ${JAVA_HOME}/bin/javac -d build/classes $^
 
-build:	java-build
+build:	gen-code java-build
 	@mkdir -p ${BIN} && \
 	cc ${CCFLAGS} ${NATIVE_FILES_PATH}/evp_utils.c -o ${BIN}/evp_utils.o && \
 	cc ${CCFLAGS} ${NATIVE_FILES_PATH}/drbg.c -o ${BIN}/drbg.o && \
@@ -37,8 +40,8 @@ build:	java-build
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/jni_utils.c -o ${BIN}/jni_utils.o && \
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_OpenSSLDrbg.c \
 		-o ${BIN}/com_canonical_openssl_OpenSSLDrbg.o && \
-	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_OpenSSLCipherSpi.c \
-		-o ${BIN}/com_canonical_openssl_OpenSSLCipherSpi.o && \
+	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_OpenSSLCipher.c \
+		-o ${BIN}/com_canonical_openssl_OpenSSLCipher.o && \
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_keyagreement_OpenSSLKeyAgreement.c \
 		-o ${BIN}/com_canonical_openssl_keyagreement_OpenSSLKeyAgreement.o && \
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMDecapsulator.c \
@@ -46,7 +49,7 @@ build:	java-build
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMEncapsulator.c \
 		-o ${BIN}/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMEncapsulator.o && \
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_mac_OpenSSLMAC.c \
-		-o ${BIN}/com_canonical_openssl_mac_OpenSSLMACSpi.o && \
+		-o ${BIN}/com_canonical_openssl_mac_OpenSSLMAC.o && \
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_OpenSSLMD.c \
 		-o ${BIN}/com_canonical_openssl_OpenSSLMD.o && \
 	cc ${CCFLAGS} ${JNI_FILES_PATH}/com_canonical_openssl_kdf_OpenSSLPBKDF2.c \
@@ -66,11 +69,11 @@ build:	java-build
 		${BIN}/signature.o \
 		${BIN}/kdf.o \
 		${BIN}/com_canonical_openssl_OpenSSLDrbg.o \
-		${BIN}/com_canonical_openssl_OpenSSLCipherSpi.o \
+		${BIN}/com_canonical_openssl_OpenSSLCipher.o \
 		${BIN}/com_canonical_openssl_keyagreement_OpenSSLKeyAgreement.o \
 		${BIN}/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMEncapsulator.o \
 		${BIN}/com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_RSAKEMDecapsulator.o \
-		${BIN}/com_canonical_openssl_mac_OpenSSLMACSpi.o \
+		${BIN}/com_canonical_openssl_mac_OpenSSLMAC.o \
 		${BIN}/com_canonical_openssl_OpenSSLMD.o \
 		${BIN}/com_canonical_openssl_kdf_OpenSSLPBKDF2.o \
 		${BIN}/com_canonical_openssl_OpenSSLSignature.o \
@@ -147,4 +150,4 @@ test-kdf: build
 	@mkdir -p build/test &&  cc ${INCLUDE_HEADERS} -L${BIN}/ -L/usr/local/lib64 -o build/test/kdf test/kdf.c -ljssl && \
 	LD_LIBRARY_PATH=${BIN} ./build/test/kdf 2>/dev/null
 clean:
-	@rm -rf build
+	@rm -rf build && rm -f ${JAVA_SRC}/cipher/AES*.java
