@@ -1,4 +1,4 @@
-import com.canonical.openssl.*;
+import com.canonical.openssl.cipher.*;
 import javax.crypto.CipherSpi;
 import javax.crypto.Cipher;
 import java.security.Key;
@@ -14,10 +14,19 @@ import java.security.spec.AlgorithmParameterSpec;
 
 // TODO: refactoring
 // failing CCM tests
-class AesCipherTest extends AesOpenSSLCipherSpi {
+class AesCipherTest extends CipherAes {
     public AesCipherTest(String nameKeySizeAndMode, String padding) {
         super(nameKeySizeAndMode, padding);
     }
+
+    @Override
+    public String getPadding() { return null; }
+
+    @Override
+    public String getMode() { return null; }
+
+    @Override
+    public int getKeySize() { return -1; }
 
     void init(int opmode, Key key, AlgorithmParameterSpec spec, SecureRandom random) {
         super.engineInit(opmode, key, spec, random);
