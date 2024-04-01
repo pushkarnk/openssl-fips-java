@@ -12,7 +12,7 @@ extern "C" {
  * Method:    engineSignInit
  * Signature: (Ljava/lang/String;LOpenSSLPublicKey;LOpenSSLSignatureSpi/Params;)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitSign
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineInitSign
   (JNIEnv *, jobject, jstring, jobject, jobject);
 
 /*
@@ -20,7 +20,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitSign
  * Method:    engineVerifyInit
  * Signature: (Ljava/lang/String;LOpenSSLPrivateKey;LOpenSSLSignatureSpi/Params;)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitVerify
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineInitVerify
   (JNIEnv *, jobject, jstring, jobject, jobject);
 
 /*
@@ -28,7 +28,7 @@ JNIEXPORT jlong JNICALL Java_OpenSSLSignatureSpi_engineInitVerify
  * Method:    engineSign0
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLSignatureSpi_engineSign0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineSign0
   (JNIEnv *, jobject);
 
 /*
@@ -36,7 +36,7 @@ JNIEXPORT jbyteArray JNICALL Java_OpenSSLSignatureSpi_engineSign0
  * Method:    engineUpdate0
  * Signature: ([BII)V
  */
-JNIEXPORT void JNICALL Java_OpenSSLSignatureSpi_engineUpdate0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineUpdate0
   (JNIEnv *, jobject, jbyteArray, jint, jint);
 
 /*
@@ -44,7 +44,7 @@ JNIEXPORT void JNICALL Java_OpenSSLSignatureSpi_engineUpdate0
  * Method:    engineVerify0
  * Signature: ([BII)Z
  */
-JNIEXPORT jboolean JNICALL Java_OpenSSLSignatureSpi_engineVerify0
+JNIEXPORT jboolean JNICALL Java_com_canonical_openssl_signature_OpenSSLSignature_engineVerify0
   (JNIEnv *, jobject, jbyteArray, jint, jint);
 
 #ifdef __cplusplus

@@ -1,3 +1,5 @@
+package com.canonical.openssl.signature;
+import com.canonical.openssl.key.*;
 import java.nio.ByteBuffer;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.AlgorithmParameters;
@@ -8,7 +10,7 @@ import java.security.SecureRandom;
 import java.security.SignatureException;
 import java.security.SignatureSpi;
 
-public abstract class OpenSSLSignatureSpi extends SignatureSpi {
+public abstract class OpenSSLSignature extends SignatureSpi {
 
     static {
         System.loadLibrary("jssl");
