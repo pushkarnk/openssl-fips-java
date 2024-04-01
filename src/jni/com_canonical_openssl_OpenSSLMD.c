@@ -1,4 +1,4 @@
-#include "com_canonical_openssl_OpenSSLMDSpi.h"
+#include "com_canonical_openssl_OpenSSLMD.h"
 #include "jssl.h"
 #include "md.h"
 #include "jni_utils.h"
@@ -6,21 +6,21 @@
 extern OSSL_LIB_CTX *global_libctx;
 
 /*
- * Class:     OpenSSLMDSpi
+ * Class:     OpenSSLMD
  * Method:    doInit0
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_OpenSSLMDSpi_doInit0
+JNIEXPORT jlong JNICALL Java_com_canonical_openssl_md_OpenSSLMD_doInit0
   (JNIEnv *env, jobject this, jstring algorithm) {
     return (jlong) md_init(global_libctx, (const char*)jstring_to_char_array(env, algorithm));
 }
 
 /*
- * Class:     OpenSSLMDSpi
+ * Class:     OpenSSLMD
  * Method:    doUpdate0
  * Signature: ([B)V
  */
-JNIEXPORT void JNICALL Java_OpenSSLMDSpi_doUpdate0
+JNIEXPORT void JNICALL Java_com_canonical_openssl_md_OpenSSLMD_doUpdate0
   (JNIEnv *env, jobject this, jbyteArray data) {
     md_context *ctx = (md_context*) get_long_field(env, this, "nativeHandle");
     byte *data_array = jbyteArray_to_byte_array(env, data);
@@ -29,11 +29,11 @@ JNIEXPORT void JNICALL Java_OpenSSLMDSpi_doUpdate0
 }
 
 /*
- * Class:     OpenSSLMDSpi
+ * Class:     OpenSSLMD
  * Method:    doFinal0
  * Signature: ()[B
  */
-JNIEXPORT jbyteArray JNICALL Java_OpenSSLMDSpi_doFinal0
+JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_md_OpenSSLMD_doFinal0
   (JNIEnv *env, jobject this) {
     byte digest[1024];
     int digest_length = 0;
