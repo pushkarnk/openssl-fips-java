@@ -23,6 +23,11 @@ final public class OpenSSLKEMRSA implements KEMSpi {
         System.loadLibrary("jssl");
     }
 
+    @Override
+    public String toString() {
+        return "RSA Key Encapsulation Mechanism";
+    }
+
     public EncapsulatorSpi engineNewEncapsulator(PublicKey publicKey,
             AlgorithmParameterSpec spec, SecureRandom secureRandom)
                     throws InvalidAlgorithmParameterException, InvalidKeyException {
@@ -104,3 +109,4 @@ final public class OpenSSLKEMRSA implements KEMSpi {
 
     }
 }
+

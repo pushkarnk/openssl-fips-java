@@ -3,6 +3,7 @@ JAVA_HOME :=/usr/lib/jvm/java-21-openjdk-amd64/
 JAVA_SRC := src/java/com/canonical/openssl
 JAVA_SRC_DIRS := ${JAVA_SRC} ${JAVA_SRC}/drbg ${JAVA_SRC}/keyagreement ${JAVA_SRC}/keyencapsulation ${JAVA_SRC}/mac
 JAVA_SRC_DIRS += ${JAVA_SRC}/kdf ${JAVA_SRC}/md ${JAVA_SRC}/signature ${JAVA_SRC}/key ${JAVA_SRC}/cipher
+JAVA_SRC_DIRS += ${JAVA_SRC}/provider
 
 JAVA_FILES := $(wildcard $(addsuffix /*.java, $(JAVA_SRC_DIRS)))
 
@@ -89,6 +90,10 @@ build-test-lib:
 		build/test/EdDSAPrivateKey.o \
 		build/test/EdDSAPublicKey.o \
 		-L/usr/local/lib64 -L${BIN} -lcrypto -lssl -ljssl
+
+test-sanity: build
+	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/ProviderSanityTest.java && \
+	${JAVA_HOME}/bin/java --add-opens=java.base/javax.crypto=ALL-UNNAMED  --add-opens=java.base/java.security=ALL-UNNAMED -Djava.library.path=${LIBPATH} -cp build/classes:build/test/java ProviderSanityTest
 
 test-java-sv: build build-test-lib
 	@mkdir -p build/test/java && ${JAVA_HOME}/bin/javac -cp build/classes -d build/test/java test/java/SignatureTest.java && \
