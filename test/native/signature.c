@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 char* message = "Into the valley of death, rode the six hundred!";
+int rc;
  
 void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *private_key, char *digest, sv_type type) {
     // TODO: this crashes in openssl/fips.so
@@ -23,6 +24,7 @@ void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *
         free_sv_params(p);
         free_sv_key(key);
         printf("FAILED (sign init)\n");
+        rc = 1;
         return;
     }
     sv_update(svc, message, strlen(message));
@@ -33,6 +35,7 @@ void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *
         free_sv_key(key);
         free_sv_context(svc);
         printf("FAILED (signing)\n");
+        rc = 1;
         return;
     }
 
@@ -42,6 +45,7 @@ void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *
         free_sv_key(key);
         free_sv_context(svc);
         printf("FAILED (signing)\n");
+        rc = 1;
         return;
     }
 
@@ -51,6 +55,7 @@ void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *
         free_sv_params(p);
         free_sv_key(pubkey);
         printf("FAILED (verify init)\n");
+        rc = 1;
         return;
     }
 
@@ -59,6 +64,7 @@ void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *
         free_sv_key(pubkey);
         free_sv_context(svc1);
         printf("FAILED (verify update) \n");
+        rc = 1;
         return;  
     }
 
@@ -67,6 +73,7 @@ void test_sign_and_verify(OSSL_LIB_CTX *libctx, EVP_PKEY *public_key, EVP_PKEY *
         free_sv_key(pubkey);
         free_sv_context(svc1);
         printf("FAILED (verify)\n");
+        rc = 1;
         return;
     }
 
@@ -90,6 +97,7 @@ void test_ed25519_sign_and_verify(OSSL_LIB_CTX *libctx) {
 
     if (priv_key_pem == NULL || pub_key_pem == NULL) {
         printf("FAILED (can't read PEM files)\n");
+        rc = 1;
     }
 
     private_key = PEM_read_PrivateKey_ex(priv_key_pem, NULL, NULL, NULL, libctx, NULL);
@@ -97,6 +105,7 @@ void test_ed25519_sign_and_verify(OSSL_LIB_CTX *libctx) {
 
     if (private_key == NULL || public_key == NULL) {
         printf("FAILED (can't decode PEM files)");
+        rc = 1;
     }
     test_sign_and_verify(libctx, public_key, private_key, NULL, SV_ED25519);
 }
@@ -110,6 +119,7 @@ void test_ed448_sign_and_verify(OSSL_LIB_CTX *libctx) {
     
     if (priv_key_pem == NULL || pub_key_pem == NULL) {
         printf("FAILED (can't read PEM files)\n");
+        rc = 1;
     }
     
     private_key = PEM_read_PrivateKey_ex(priv_key_pem, NULL, NULL, NULL, libctx, NULL);
@@ -117,6 +127,7 @@ void test_ed448_sign_and_verify(OSSL_LIB_CTX *libctx) {
     
     if (private_key == NULL || public_key == NULL) {
         printf("FAILED (can't decode PEM files)");
+        rc = 1;
     }
     test_sign_and_verify(libctx, public_key, private_key, NULL, SV_ED448);
 }
@@ -127,4 +138,5 @@ int main(int argc, char ** argv) {
     test_rsa_sign_and_verify(libctx);
     test_ed25519_sign_and_verify(libctx);
     test_ed448_sign_and_verify(libctx);
+    return rc;
 }

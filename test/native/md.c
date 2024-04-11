@@ -4,6 +4,7 @@
 char *message1 = "Namaste, World!";
 char *message2 = "How are you all?";
 char *message3 = "How are you all!";
+int rc;
 
 int equal(byte *out1, int len1, byte *out2, int len2) {
     if (len1 != len2) return 0;
@@ -24,18 +25,21 @@ void test_digest(const char *algo, OSSL_LIB_CTX *libctx) {
     if (ctx == NULL) {
         free_md_context(ctx);
         printf("FAILED (init)\n");
+        rc = 1;
     }
 
     if (!(md_update(ctx, message1, strlen(message1)) &&
         md_update(ctx, message2, strlen(message2)))) {
         free_md_context(ctx);
         printf("FAILED (update)\n");
+        rc = 1;
         return;
     }
 
     if (!md_digest(ctx, output1, &len1)) {
         free_md_context(ctx);
         printf("FAILED (digest)\n");
+        rc = 1;
         return;
     }
     free_md_context(ctx);
@@ -45,17 +49,20 @@ void test_digest(const char *algo, OSSL_LIB_CTX *libctx) {
         md_update(ctx1, message3, strlen(message3)))) {
         free_md_context(ctx1);
         printf("FAILED (update)\n");
+        rc = 1;
         return;   
     }
 
     if (!md_digest(ctx1, output2, &len2)) {
         free_md_context(ctx1);
         printf("FAILED (digest)\n");
+        rc = 1;
         return;
     }
 
     if(equal(output1, len1, output2, len2)) {
        printf("FAILED (digests match)\n");
+       rc = 1;
        return;
     }
 
@@ -80,4 +87,5 @@ int main(int argc, char ** argv) {
     test_digest("SHA3-512", libctx);
     test_digest("KECCAK-KMAC-128", libctx);
     test_digest("KECCAK-KMAC-256", libctx);
+    return rc;
 }
