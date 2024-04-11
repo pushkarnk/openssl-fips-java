@@ -20,6 +20,7 @@ tests = {
   "Signatures" : ("signature", "SignatureTest"),
   "Provider Sanity" : (None, "ProviderSanityTest"),
   "SecureRandom/DRBG" : (None, "SecureRandomApiTest"),
+  "KeyAgreement/API"  : (None, "KeyAgreementApiTest"),
 }
 
 def run_java_test(name):
