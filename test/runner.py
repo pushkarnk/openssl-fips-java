@@ -19,6 +19,7 @@ tests = {
   "Message Authentication Codes" : ("mac", "MacTest"),
   "Signatures" : ("signature", "SignatureTest"),
   "Provider Sanity" : (None, "ProviderSanityTest"),
+  "SecureRandom/DRBG" : (None, "SecureRandomApiTest"),
 }
 
 def run_java_test(name):

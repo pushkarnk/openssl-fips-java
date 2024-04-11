@@ -22,7 +22,7 @@ public class OpenSSLDrbg extends SecureRandomSpi {
     }
 
     protected OpenSSLDrbg(String name, SecureRandomParameters params) throws IllegalArgumentException {
-        if(!(params instanceof DrbgParameters.Instantiation)) {
+        if(params != null && !(params instanceof DrbgParameters.Instantiation)) {
             throw new IllegalArgumentException("Parameters of type DrbgParameters.Instantiation expected, passed " + params.getClass());
         }
 

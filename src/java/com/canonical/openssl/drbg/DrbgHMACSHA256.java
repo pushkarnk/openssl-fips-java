@@ -7,6 +7,10 @@ final public class DrbgHMACSHA256 extends OpenSSLDrbg {
         super("HMAC-DRBG");
     }
 
+    public DrbgHMACSHA256(SecureRandomParameters params) {
+        super("HMAC-DRBG", params);
+    }
+
     @Override
     public String toString() {
         return "HMAC-DRBG-with-SHA256";
