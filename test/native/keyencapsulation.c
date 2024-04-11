@@ -14,6 +14,7 @@ int check(byte* alice_secret, size_t as_len, byte* bob_secret, size_t bs_len) {
 }
 
 int main(int argc, char ** argv) {
+    int rc = 0;
     printf("Testing EVP_KEM-RSA key encapsulation: ");
     byte *public_key_bytes = NULL;
     size_t public_key_len = 0;
@@ -42,9 +43,10 @@ int main(int argc, char ** argv) {
         printf("PASSED\n");
     } else {
         printf("FAILED\n");
+        rc = 1;
     }
     free_kem_keyspec(spec_alice);
     //free_kem_keyspec(spec_bob); //alice and bob share keys, don't delete twice
     free(spec_bob);
-    return 0; 
+    return rc; 
 } 

@@ -13,7 +13,8 @@ int compare(shared_secret *s1, shared_secret *s2) {
     return 1;
 }
 
-void test(key_agreement_algorithm algo, OSSL_LIB_CTX *libctx) {
+int test(key_agreement_algorithm algo, OSSL_LIB_CTX *libctx) {
+    int rc = 0;
     switch(algo) {
         case DIFFIE_HELLMAN: printf("Testing DIFFIE_HELLMAN key-agreement: "); break;
         case ELLIPTIC_CURVE: printf("Testing ELLIPTIC_CURVE key-agreement: "); break;
@@ -36,6 +37,9 @@ void test(key_agreement_algorithm algo, OSSL_LIB_CTX *libctx) {
 
     if (compare(alice_secret, bob_secret)) {
         printf(" PASSED\n");
+    } else {
+        printf(" FAILED\n");
+        rc = 1;
     }
 
     free_key_pair(alice_key);
@@ -45,11 +49,14 @@ void test(key_agreement_algorithm algo, OSSL_LIB_CTX *libctx) {
     free_key_agreement(alice);
     //free_key_agreement(bob); // keys are shared, don't free twice
     free(bob);
+    return rc;
 }
 
 int main(int argc, char *argv[]) {
     OSSL_LIB_CTX *libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
-    test(DIFFIE_HELLMAN, libctx);
-    test(ELLIPTIC_CURVE, libctx);
+    int rc = 0;
+    rc = test(DIFFIE_HELLMAN, libctx);
+    rc = test(ELLIPTIC_CURVE, libctx);
+    return rc;
 }
 

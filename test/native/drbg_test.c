@@ -1,6 +1,7 @@
 #include "jssl.h"
 #include <drbg.h>
 
+int result = 0;
 void test_xxx_drbg(const char *test, const char *algo) {
     DRBG *drbg = create_DRBG(algo, NULL);
     byte output1[10] = {0}, output2[10] = {0}, output3[10] = {0};
@@ -17,6 +18,7 @@ void test_xxx_drbg(const char *test, const char *algo) {
         }
     }
     printf("drbg_test/%s: FAIL\n", test);
+    result = 1;
     free_DRBG(drbg);
 }
 
@@ -71,5 +73,5 @@ int main(int argc, char ** argv) {
     test_rand_int_num_bits("HMAC-DRBG", 16);
     test_rand_int_num_bits("HASH-DRBG", 30);
     test_rand_int_num_bits("HASH-DRBG", 32);
-    return 0;
+    return result;
 }

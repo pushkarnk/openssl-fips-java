@@ -1,6 +1,8 @@
 #include "jssl.h"
 #include "mac.h"
 
+int rc;
+
 static unsigned char key[] = {
     0x6c, 0xde, 0x14, 0xf5, 0xd5, 0x2a, 0x4a, 0xdf,
     0x12, 0x39, 0x1e, 0xbf, 0x36, 0xf9, 0x6a, 0x46,
@@ -50,6 +52,7 @@ void run_test(mac_context *ctx) {
     size_t written;
     if(0 == (mac_final(ctx, output, &written, 256))) {
         printf("FAILED(final)\n");
+        rc = 1;
     }
 
     printf("PASSED (MAC: ");
@@ -123,5 +126,6 @@ void test_mac_context_creation(OSSL_LIB_CTX *libctx) {
 int main(int argc, char ** argv) {
     OSSL_LIB_CTX *libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
     test_mac_context_creation(libctx);
+    return rc;
 }
 
