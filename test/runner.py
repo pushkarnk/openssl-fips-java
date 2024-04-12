@@ -19,8 +19,9 @@ tests = {
   "Message Authentication Codes" : ("mac", "MacTest"),
   "Signatures" : ("signature", "SignatureTest"),
   "Provider Sanity" : (None, "ProviderSanityTest"),
-  "SecureRandom/DRBG" : (None, "SecureRandomApiTest"),
+  "SecureRandom/API" : (None, "SecureRandomApiTest"),
   "KeyAgreement/API"  : (None, "KeyAgreementApiTest"),
+  "Key Encapsulation Mechanism/API": (None, "KeyEncapsulationApiTest"),
 }
 
 def run_java_test(name):
