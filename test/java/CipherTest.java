@@ -89,7 +89,8 @@ public class CipherTest {
         boolean fails = false;
         for (String cipher : ciphers) {
             for(String padding : paddings) {
-                if (!runTestSingleUpdate(cipher, padding)) { 
+                if (!runTestSingleUpdate(cipher, padding)) {
+                    System.out.println(cipher + " " + padding);
                     fails = true;
                 }
             }
