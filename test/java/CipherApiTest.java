@@ -146,8 +146,9 @@ public class CipherApiTest {
         System.arraycopy(enc2, 0, fullEnc, encLen, enc2.length);
         encLen += enc2.length;
 
-        cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), spec, sr);
-        byte[] output = cipher.doFinal(fullEnc, 0, encLen);
+        Cipher decipher = Cipher.getInstance(nameKeySizeAndMode + "/" + padding, "OpenSSLFIPSProvider");
+        decipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), spec, sr);
+        byte[] output = decipher.doFinal(fullEnc, 0, encLen);
 
         return Arrays.equals(fullInput, output);
     }
@@ -182,15 +183,12 @@ public class CipherApiTest {
         sr.nextBytes(input);
 
         byte[] outFinal = cipher.doFinal(input, 0, input.length);
-    
-        cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), spec, sr);
-        byte[] output = cipher.doFinal(outFinal, 0, outFinal.length);
 
-        boolean b = Arrays.equals(input, output);
-        if (!b) {
-            System.out.println("Failed: " + nameKeySizeAndMode + "/" + padding);
-        }
-        return b;
+        Cipher decipher = Cipher.getInstance(nameKeySizeAndMode + "/" + padding, "OpenSSLFIPSProvider");
+        decipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), spec, sr);
+        byte[] output = decipher.doFinal(outFinal, 0, outFinal.length);
+
+        return Arrays.equals(input, output);
     }
  
 }
