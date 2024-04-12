@@ -22,6 +22,7 @@ tests = {
   "SecureRandom/API" : (None, "SecureRandomApiTest"),
   "KeyAgreement/API"  : (None, "KeyAgreementApiTest"),
   "Key Encapsulation Mechanism/API": (None, "KeyEncapsulationApiTest"),
+  "Cipher/API" : (None, "CipherApiTest"),
 }
 
 def run_java_test(name):
