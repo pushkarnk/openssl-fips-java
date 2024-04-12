@@ -7,6 +7,10 @@ final public class DrbgHashSHA512 extends OpenSSLDrbg {
         super("HASH-DRBG");
     }
 
+    public DrbgHashSHA512(SecureRandomParameters params) {
+        super("HASH-DRBG", params);
+    }
+
     @Override
     public String toString() {
         return "HASH-DRBG-with-SHA512";
