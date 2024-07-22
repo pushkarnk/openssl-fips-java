@@ -1,5 +1,7 @@
 package com.canonical.openssl.keyencapsulation;
 
+import com.canonical.openssl.util.NativeMemoryCleaner;
+import java.lang.ref.Cleaner;
 import javax.crypto.DecapsulateException;
 import javax.crypto.KEM;
 import javax.crypto.KEM.Encapsulated;
@@ -49,9 +51,26 @@ final public class OpenSSLKEMRSA implements KEMSpi {
 
     final public class RSAKEMEncapsulator implements KEMSpi.EncapsulatorSpi {
         long nativeHandle = 0;
+
+        private static class EncapsulatorState implements Runnable {
+            private long nativeHandle;
+
+            EncapsulatorState(long handle) {
+                this.nativeHandle = handle;
+            }
+
+            @Override
+            public void run() {
+                cleanupNativeMemory(nativeHandle);
+            }
+        }
+
+        private static Cleaner cleaner = NativeMemoryCleaner.cleaner;
+        private final Cleaner.Cleanable cleanable;
+
         public RSAKEMEncapsulator(PublicKey key) {
             nativeHandle = encapsulatorInit0(key.getEncoded());
-            
+            cleanable = cleaner.register(this, new EncapsulatorState(nativeHandle));
         }
 
         public KEM.Encapsulated engineEncapsulate(int from, int to, String algorithm) {
@@ -75,6 +94,11 @@ final public class OpenSSLKEMRSA implements KEMSpi {
             return engineEncapsulationSize0();
         }
 
+        private static void cleanupNativeMemory(long handle) {
+            cleanupNativeMemory0(handle);
+        }
+
+        private static native void cleanupNativeMemory0(long handle);
         private native long encapsulatorInit0(byte[] publicKeyBytes);
         private native void engineEncapsulate0(byte[] secretBytes, byte[] encapsulatedBytes);
         private native int engineSecretSize0();
@@ -84,8 +108,25 @@ final public class OpenSSLKEMRSA implements KEMSpi {
     final public class RSAKEMDecapsulator implements KEMSpi.DecapsulatorSpi {
         long nativeHandle = 0;
 
+        private static class DecapsulatorState implements Runnable {
+            private long nativeHandle;
+
+            DecapsulatorState(long handle) {
+                this.nativeHandle = handle;
+            }
+
+            @Override
+            public void run() {
+                cleanupNativeMemory(nativeHandle);
+            }
+        }
+
+        private static Cleaner cleaner = NativeMemoryCleaner.cleaner;
+        private final Cleaner.Cleanable cleanable;
+
         public RSAKEMDecapsulator(PrivateKey key) {
             nativeHandle = decapsulatorInit0(key.getEncoded());
+            cleanable = cleaner.register(this, new DecapsulatorState(nativeHandle));
         }
 
         public SecretKey engineDecapsulate(byte[] encapsulation, int from, int to, String algorithm)
@@ -102,11 +143,15 @@ final public class OpenSSLKEMRSA implements KEMSpi {
             return engineEncapsulationSize0();
         }
 
+        private static void cleanupNativeMemory(long handle) {
+            cleanupNativeMemory0(handle);
+        }
+
+        private static native void cleanupNativeMemory0(long handle);
         private native long decapsulatorInit0(byte[] key);
         private native byte[] engineDecapsulate0(byte[] encapsulateArray);
         private native int engineSecretSize0();
         private native int engineEncapsulationSize0();
-
     }
 }
 

@@ -27,8 +27,8 @@ JNIEXPORT long JNICALL Java_com_canonical_openssl_keyagreement_OpenSSLKeyAgreeme
     key_agreement *agreement = init_key_agreement(type, global_libctx);
     byte* key_bytes = jbyteArray_to_byte_array(env, keyBytes);
     size_t key_length = array_length(env, keyBytes);
-    key_pair private_key = { create_private_key(get_key_type(type), key_bytes, key_length) };
-    set_private_key(agreement, &private_key);
+    EVP_PKEY *private_key = create_private_key(get_key_type(type), key_bytes, key_length);
+    set_private_key(agreement, private_key);
     return (long)agreement; 
 }
 
@@ -42,8 +42,8 @@ JNIEXPORT void JNICALL Java_com_canonical_openssl_keyagreement_OpenSSLKeyAgreeme
     key_agreement *agreement = (key_agreement *)get_long_field(env, this, "nativeHandle");
     byte* key_bytes = jbyteArray_to_byte_array(env, keyBytes);
     size_t key_length = array_length(env, keyBytes);
-    key_pair public_key = { create_public_key(key_bytes, key_length) };
-    set_peer_key(agreement, &public_key);
+    EVP_PKEY *public_key = create_public_key(key_bytes, key_length);
+    set_peer_key(agreement, public_key);
 }
 
 /*
@@ -55,5 +55,17 @@ JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_keyagreement_OpenSSLKeyA
   (JNIEnv * env, jobject this) {
     key_agreement *agreement = (key_agreement *)get_long_field(env, this, "nativeHandle");
     shared_secret *secret = generate_shared_secret(agreement);
-    return byte_array_to_jbyteArray(env, secret->bytes, secret->length);
+    jbyteArray byteArray = byte_array_to_jbyteArray(env, secret->bytes, secret->length);
+    free_shared_secret(secret);
+    return byteArray;
+}
+
+/*
+ * Class:     com_canonical_openssl_keyagreement_OpenSSLKeyAgreement
+ * Method:    cleanupNativeMemory0
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_com_canonical_openssl_keyagreement_OpenSSLKeyAgreement_cleanupNativeMemory0
+  (JNIEnv *env, jclass clazz, jlong handle) {
+    free_key_agreement((key_agreement*) handle);
 }

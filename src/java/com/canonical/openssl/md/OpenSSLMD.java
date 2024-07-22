@@ -1,5 +1,8 @@
 package com.canonical.openssl.md;
 
+import com.canonical.openssl.util.NativeMemoryCleaner;
+
+import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 import java.security.DigestException;
 import java.security.MessageDigestSpi;
@@ -13,9 +16,25 @@ public abstract class OpenSSLMD extends MessageDigestSpi {
         System.loadLibrary("jssl");
     }
 
+    private static class MDState implements Runnable {
+        private long nativeHandle;
+
+        MDState(long handle) {
+            this.nativeHandle = handle;
+        }
+
+        @Override
+        public void run() {
+            cleanupNativeMemory(nativeHandle);
+        }
+    }
+
     private String mdName;
     private long nativeHandle;
     private boolean initialized = false;
+
+    private static Cleaner cleaner = NativeMemoryCleaner.cleaner;
+    private Cleaner.Cleanable cleanable;
 
     protected OpenSSLMD(String algorithm) {
         this.mdName = algorithm;
@@ -62,6 +81,7 @@ public abstract class OpenSSLMD extends MessageDigestSpi {
         synchronized(this) {
            if (!this.initialized) {
                nativeHandle = doInit0(mdName);
+               cleanable = cleaner.register(nativeHandle, new MDState(nativeHandle));
                this.initialized = true;
            }
         }
@@ -72,6 +92,11 @@ public abstract class OpenSSLMD extends MessageDigestSpi {
         return mdName;
     }
 
+    private static void cleanupNativeMemory(long handle) {
+        cleanupNativeMemory0(handle);
+    }
+
+    private static native void cleanupNativeMemory0(long handle);
     private native long doInit0(String name);
     private native void doUpdate0(byte[] data);
     private native byte[] doFinal0();

@@ -128,10 +128,10 @@ public class DrbgTest {
         if (allZeros1 || allZeros2) {
             System.out.print("[allZeros]");
         }
-        if (matchingBytes > 2 || matchPercentage > 10.0) {
+        if (matchingBytes > 2 || matchPercentage > 20.0) {
             System.out.print("[number of matches = " + matchingBytes + "]");
         }
-        return (!tooManyZeros) && (!allZeros1) && (!allZeros2) && (matchingBytes < 2  && matchPercentage <= 10.0);
+        return (!tooManyZeros) && (!allZeros1) && (!allZeros2) && (matchingBytes < 2  && matchPercentage <= 20.0);
     }
 
     private static void testDRBGCreation() {

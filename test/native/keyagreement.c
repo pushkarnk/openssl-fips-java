@@ -22,8 +22,8 @@ int test(key_agreement_algorithm algo, OSSL_LIB_CTX *libctx) {
 
     shared_secret *alice_secret, *bob_secret;
 
-    key_pair *alice_key = generate_key(algo);
-    key_pair *bob_key = generate_key(algo);
+    EVP_PKEY *alice_key = generate_key(algo);
+    EVP_PKEY *bob_key = generate_key(algo);
 
     key_agreement *alice = init_key_agreement(algo, libctx);
     set_private_key(alice, alice_key);
@@ -42,8 +42,6 @@ int test(key_agreement_algorithm algo, OSSL_LIB_CTX *libctx) {
         rc = 1;
     }
 
-    free_key_pair(alice_key);
-    free_key_pair(bob_key);
     free_shared_secret(alice_secret);
     free_shared_secret(bob_secret);
     free_key_agreement(alice);

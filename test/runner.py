@@ -5,7 +5,7 @@ import os
 JAVA_HOME = os.environ["JAVA_HOME"]
 LIBPATH = os.environ["LIBPATH"]
 CLASSPATH = "build/classes:build/test/classes" 
-OPENS = "\-\-add-opens=java.base/javax.crypto=ALL-UNNAMED  \-\-add-opens=java.base/java.security=ALL-UNNAMED"
+OPENS = "\\-\\-add-opens=java.base/javax.crypto=ALL-UNNAMED  \\-\\-add-opens=java.base/java.security=ALL-UNNAMED"
 failing_tests = []
 n_tests = 0
 

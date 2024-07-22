@@ -1,5 +1,9 @@
 package com.canonical.openssl.signature;
+
 import com.canonical.openssl.key.*;
+import com.canonical.openssl.util.NativeMemoryCleaner;
+
+import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.AlgorithmParameters;
@@ -16,7 +20,23 @@ public abstract class OpenSSLSignature extends SignatureSpi {
         System.loadLibrary("jssl");
     }
 
+    private static class SignatureState implements Runnable {
+        private long nativeHandle;
+
+        SignatureState(long handle) {
+            this.nativeHandle = handle;
+        }
+
+        @Override
+        public void run() {
+            cleanupNativeMemory(nativeHandle);
+        }
+    }
     private long nativeHandle = 0L;
+
+    private static Cleaner cleaner = NativeMemoryCleaner.cleaner;
+    private Cleaner.Cleanable cleanable;
+
     private Params params = new Params(null, -1, Padding.NONE, null);;
 
     enum Padding { NONE, PSS };
@@ -77,6 +97,7 @@ public abstract class OpenSSLSignature extends SignatureSpi {
     protected void engineInitSign(PrivateKey key) throws InvalidKeyException {
        if (key instanceof OpenSSLPrivateKey privKey) {
            nativeHandle = engineInitSign0(getSignatureName(), privKey, params);
+           cleanable = cleaner.register(this, new SignatureState(nativeHandle));
        } else {
            throw new InvalidKeyException ("Supplied PrivateKey is of type: " + key.getClass());
        }
@@ -92,6 +113,7 @@ public abstract class OpenSSLSignature extends SignatureSpi {
     protected void engineInitVerify(PublicKey key) throws InvalidKeyException {
         if (key instanceof OpenSSLPublicKey pubKey) {
             nativeHandle = engineInitVerify0(getSignatureName(), pubKey, params);
+            cleanable = cleaner.register(this, new SignatureState(nativeHandle));
         } else {
             throw new InvalidKeyException ("Supplied PublicKey is not OpenSSL-based");
         }
@@ -153,6 +175,11 @@ public abstract class OpenSSLSignature extends SignatureSpi {
         return engineVerify0(sigBytes, offset, length);
     }
 
+    private static void cleanupNativeMemory(long handle) {
+        cleanupNativeMemory0(handle);
+    }
+
+    private static native void cleanupNativeMemory0(long handle);
     private native long engineInitSign0(String signatureType, OpenSSLPrivateKey privateKey, Params params);
     private native long engineInitVerify0(String signatureType, OpenSSLPublicKey publicKey, Params params);
     private native byte[] engineSign0();

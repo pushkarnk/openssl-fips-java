@@ -57,3 +57,8 @@ JNIEXPORT jint JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA
     kem_keyspec *spec = (kem_keyspec*)get_long_field(env, this, "nativeHandle");
     return get_encapsulation_size(spec, JNI_FALSE);
 }
+
+JNIEXPORT void JNICALL Java_com_canonical_openssl_keyencapsulation_OpenSSLKEMRSA_00024RSAKEMDecapsulator_cleanupNativeMemory0
+  (JNIEnv *env, jclass clazz, jlong handle) {
+    free_kem_keyspec((kem_keyspec*)handle);
+}

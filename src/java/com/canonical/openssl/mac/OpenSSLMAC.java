@@ -1,5 +1,7 @@
 package com.canonical.openssl.mac;
 
+import com.canonical.openssl.util.NativeMemoryCleaner;
+import java.lang.ref.Cleaner;
 import java.nio.ByteBuffer;
 import java.security.Key;
 import java.util.Arrays;
@@ -13,6 +15,20 @@ public abstract class OpenSSLMAC extends MacSpi {
         System.loadLibrary("jssl");
     }
 
+
+    private static class MACState implements Runnable {
+        private long nativeHandle;
+
+        MACState(long handle) {
+            this.nativeHandle = handle;
+        }
+
+        @Override
+        public void run() {
+            cleanupNativeMemory(nativeHandle);
+        }
+    }
+
     long nativeHandle;
     String cipherType;
     String digestType;
@@ -22,6 +38,9 @@ public abstract class OpenSSLMAC extends MacSpi {
     protected abstract String getCipherType();
     protected abstract String getDigestType();
     protected abstract byte[] getIV();
+
+    private static Cleaner cleaner = NativeMemoryCleaner.cleaner;
+    private Cleaner.Cleanable cleanable;
 
     @Override
     protected byte[] engineDoFinal() {
@@ -40,6 +59,7 @@ public abstract class OpenSSLMAC extends MacSpi {
             outputLength = hmacSpec.getOutputLength();
         }
         nativeHandle = doInit0(getAlgorithm(), getCipherType(), getDigestType(), getIV(), outputLength, key.getEncoded());
+        cleanable = cleaner.register(this, new MACState(nativeHandle));
     }
 
     @Override
@@ -71,9 +91,13 @@ public abstract class OpenSSLMAC extends MacSpi {
             || object instanceof HMACwithSHA3_512; 
     }
 
+    private static void cleanupNativeMemory(long handle) {
+        cleanupNativeMemory0(handle);
+    }
+
+    private static native void cleanupNativeMemory0(long handle);
     native long doInit0(String algo, String cipher, String digest, byte[] iv, int outLen, byte[] key);
     native int getMacLength();
     native void doUpdate0(byte[] input);
     native byte[] doFinal0();
-    
 }

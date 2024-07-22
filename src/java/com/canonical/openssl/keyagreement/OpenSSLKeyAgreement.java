@@ -1,5 +1,7 @@
 package com.canonical.openssl.keyagreement;
 
+import com.canonical.openssl.util.NativeMemoryCleaner;
+import java.lang.ref.Cleaner;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
@@ -19,6 +21,22 @@ abstract public class OpenSSLKeyAgreement extends KeyAgreementSpi {
     private State state = State.UNINITIALIZED;
 
     private long nativeHandle = 0;
+
+    private static class KeyAgreementState implements Runnable {
+        private long nativeHandle;
+
+        KeyAgreementState(long handle) {
+            this.nativeHandle = handle;
+        }
+
+        @Override
+        public void run() {
+            cleanupNativeMemory(nativeHandle);
+        }
+    }
+
+    private static Cleaner cleaner = NativeMemoryCleaner.cleaner;
+    private Cleaner.Cleanable cleanable;
 
     protected Key engineDoPhase(Key key, boolean lastPhase) {
         if (state == State.UNINITIALIZED) {
@@ -52,11 +70,17 @@ abstract public class OpenSSLKeyAgreement extends KeyAgreementSpi {
 
     protected void engineInit(Key key, SecureRandom random) {
         nativeHandle = initialize(key);
+        cleanable = cleaner.register(this, new KeyAgreementState(nativeHandle)); 
         state = State.INITIALIZED;
     }
 
     protected abstract long initialize(Key key);
 
+    private static void cleanupNativeMemory(long handle) {
+        cleanupNativeMemory0(handle);
+    }
+
+    private static native void cleanupNativeMemory0(long handle);
     protected native long engineInit0(int type, byte[] privateKey);
     native void engineDoPhase0(byte[] publicKey);
     native byte[] engineGenerateSecret0();

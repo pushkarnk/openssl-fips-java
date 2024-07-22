@@ -5,7 +5,7 @@ BUILD     := ${PWD}/build
 JAVA_SRC      := src/java/com/canonical/openssl
 JAVA_SRC_DIRS := ${JAVA_SRC} ${JAVA_SRC}/drbg ${JAVA_SRC}/keyagreement ${JAVA_SRC}/keyencapsulation ${JAVA_SRC}/mac
 JAVA_SRC_DIRS += ${JAVA_SRC}/kdf ${JAVA_SRC}/md ${JAVA_SRC}/signature ${JAVA_SRC}/key ${JAVA_SRC}/cipher
-JAVA_SRC_DIRS += ${JAVA_SRC}/provider
+JAVA_SRC_DIRS += ${JAVA_SRC}/provider ${JAVA_SRC}/util
 JAVA_FILES    := $(wildcard $(addsuffix /*.java, $(JAVA_SRC_DIRS)))
 
 # Vars for compiling the C sources

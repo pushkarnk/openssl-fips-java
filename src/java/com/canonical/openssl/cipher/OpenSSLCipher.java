@@ -1,5 +1,7 @@
 package com.canonical.openssl.cipher;
 
+import com.canonical.openssl.util.NativeMemoryCleaner;
+import java.lang.ref.Cleaner;
 import javax.crypto.CipherSpi;
 import javax.crypto.Cipher;
 import java.security.Key;
@@ -31,12 +33,29 @@ abstract public class OpenSSLCipher extends CipherSpi {
     int outputSize;
     int opmode = UNDECIDED;
     boolean firstUpdate = true;
- 
+
+    private static class CipherState implements Runnable {
+        private long nativeHandle;
+
+        CipherState(long handle) {
+            this.nativeHandle = handle;
+        }
+
+        @Override
+        public void run() {
+            cleanupNativeMemory(nativeHandle);
+        }
+    } 
+
+    private Cleaner cleaner = NativeMemoryCleaner.cleaner;
+    private Cleaner.Cleanable cleanable;
+
     protected OpenSSLCipher(String nameKeySizeAndMode, String padding) {
         this.name = name;
         this.mode = nameKeySizeAndMode.split("-")[2];
         this.padding = padding;
         this.cipherContext = createContext0(nameKeySizeAndMode, padding);
+        cleanable = cleaner.register(this, new CipherState(this.cipherContext));
     }
 
     private boolean isModeCCM() {
@@ -125,6 +144,12 @@ abstract public class OpenSSLCipher extends CipherSpi {
         byte[] transformed = doUpdate0(bytes, offset, length); 
         return doFinal0(transformed, transformed.length);  
     }
+
+    private static void cleanupNativeMemory(long handle) {
+        cleanupNativeMemory0(handle);
+    }
+
+    private static native void cleanupNativeMemory0(long handle);
 
     native long createContext0(String nameAndMode, String padding);
     native void doInit0(byte[] input, int offset, int length, byte[] key, byte[] iv, int opmode);
