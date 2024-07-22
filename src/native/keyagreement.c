@@ -8,12 +8,12 @@ key_agreement* init_key_agreement(key_agreement_algorithm algo, OSSL_LIB_CTX *li
     new_agreement->libctx = libctx;
 }
 
-void set_private_key(key_agreement *agreement, key_pair *private_key) {
-    agreement->private_key = private_key->key; 
+void set_private_key(key_agreement *agreement, EVP_PKEY *private_key) {
+    agreement->private_key = private_key; 
 }
 
-void set_peer_key(key_agreement *agreement, key_pair *peer_public_key) {
-    agreement->peer_public_key = peer_public_key->key;
+void set_peer_key(key_agreement *agreement, EVP_PKEY *peer_public_key) {
+    agreement->peer_public_key = peer_public_key;
 }
 
 shared_secret *generate_shared_secret(key_agreement *agreement) {
@@ -65,7 +65,7 @@ int get_shared_secret(key_agreement *agreement, byte secret[]) {
     return agreement->secret->length;
 }
 
-key_pair *generate_key(key_agreement_algorithm algo) {
+EVP_PKEY *generate_key(key_agreement_algorithm algo) {
     EVP_PKEY_CTX *pctx = NULL;
     EVP_PKEY *key = NULL;
     OSSL_PARAM params[2];
@@ -92,9 +92,7 @@ key_pair *generate_key(key_agreement_algorithm algo) {
     if(EVP_PKEY_keygen(pctx, &key) <= 0) {
         return NULL;
     }
-    key_pair *new_key = (key_pair*) malloc(sizeof(key_pair));
-    new_key->key = key;
-    return new_key;
+    return key;
 }
 
 void free_shared_secret(shared_secret *this) {
@@ -105,10 +103,5 @@ void free_shared_secret(shared_secret *this) {
 void free_key_agreement(key_agreement *this) {
     EVP_PKEY_free(this->private_key);
     EVP_PKEY_free(this->peer_public_key);
-    free(this);
-}
-
-void free_key_pair(key_pair *this) {
-    EVP_PKEY_free(this->key);
     free(this);
 }

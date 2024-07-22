@@ -71,12 +71,26 @@ DRBG* create_DRBG_with_params(const char* name, DRBG* parent, DRBGParams *drbg_p
     DRBG *newDRBG = (DRBG*) malloc(sizeof(DRBG));
     newDRBG->context = context;
     newDRBG->seed = NULL;
+    newDRBG->params = drbg_params; 
     newDRBG->parent = parent;
     return newDRBG;
 }
 
+int free_DRBGParams(DRBGParams *params) {
+    FREE_IF_NON_NULL(params->additional_data);
+    FREE_IF_NON_NULL(params->personalization_str);
+    FREE_IF_NON_NULL(params);
+    return 1;
+}
+
 int free_DRBG(DRBG *generator) {
+    FREE_IF_NON_NULL(generator->seed); 
     EVP_RAND_CTX_free(generator->context);
+    if (generator->params != NULL)
+        free_DRBGParams(generator->params);
+    if (generator->parent != NULL) {
+        free_DRBG(generator->parent);
+    }
     free(generator);
     return 1;
 }

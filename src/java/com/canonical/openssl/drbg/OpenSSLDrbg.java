@@ -1,5 +1,7 @@
 package com.canonical.openssl.drbg;
 
+import com.canonical.openssl.util.NativeMemoryCleaner;
+import java.lang.ref.Cleaner;
 import java.security.SecureRandomSpi;
 import java.security.SecureRandomParameters;
 import java.security.DrbgParameters;
@@ -15,10 +17,27 @@ public class OpenSSLDrbg extends SecureRandomSpi {
     long drbgContext;
     SecureRandomParameters params;
 
+    private static class DRBGState implements Runnable {
+        private long nativeHandle;
+
+        DRBGState(long handle) {
+            this.nativeHandle = handle;
+        }
+
+        @Override
+        public void run() {
+            cleanupNativeMemory(nativeHandle);
+        }
+    }
+
+    private Cleaner cleaner = NativeMemoryCleaner.cleaner;
+    private Cleaner.Cleanable cleanable;
+
     private OpenSSLDrbg() { }
 
     protected OpenSSLDrbg(String name) {
         drbgContext = init(name, DEFAULT_STRENGTH, false, false, null);
+        cleanable = cleaner.register(this, new DRBGState(drbgContext));
     }
 
     protected OpenSSLDrbg(String name, SecureRandomParameters params) throws IllegalArgumentException {
@@ -34,6 +53,7 @@ public class OpenSSLDrbg extends SecureRandomSpi {
         } else {
             this.drbgContext = init(name, DEFAULT_STRENGTH, false, false, null);
         }
+        cleanable = cleaner.register(this, new DRBGState(drbgContext));
     }
 
     boolean isInitialized() {
@@ -101,6 +121,11 @@ public class OpenSSLDrbg extends SecureRandomSpi {
         engineSetSeed(seedBytes);
     }
 
+    private static void cleanupNativeMemory(long handle) {
+        cleanupNativeMemory0(handle);
+    }
+
+    private static native void cleanupNativeMemory0(long handle);
     private native long init(String name, int strength, boolean supportsPredictionResistance, boolean supportsReseeding, byte[] personalizationString);
     private native void nextBytes0(byte[] bytes, int strength, boolean supportsPredictionResistance, byte[] additionalInput);
     private native void reseed0(byte[] bytes, boolean supportsPredictionResistance, byte[] additionalInput);
