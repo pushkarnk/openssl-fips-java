@@ -1,0 +1,45 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "**" ]
+
+env:
+  OPENSSL_MODULES: /usr/local/lib64/ossl-modules/
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      run: sudo apt-get update && sudo apt-get install -y openjdk-21-jdk-headless
+    - name: Install OpenSSL FIPS
+      run: |
+        git clone https://github.com/openssl/openssl && cd openssl
+        git checkout openssl-3.0
+        sudo apt update && sudo apt install build-essential -y
+        ./Configure enable-fips && make && sudo make install && sudo make install_fips
+    - name: Setup OpenSSL configuration
+      run: |
+        sudo mkdir -p /usr/local/ssl
+        sudo cp ${{ github.workspace }}/test/conf/openssl.cnf /usr/local/ssl/openssl.cnf
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+    - name: Upload logfile
+      uses: actions/upload-artifact@v2
+      with:
+        name: test.out
+        path: ${{ github.workspace }}/build/test/test.out
