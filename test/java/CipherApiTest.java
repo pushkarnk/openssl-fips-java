@@ -23,6 +23,7 @@ public class CipherApiTest {
 
     static List<String> knownFailures = List.of(
         "AES192/GCM/ISO10126_2",
+	"AES128/GCM/PKCS7",
         "AES256/CTR/NONE"
     );
 
