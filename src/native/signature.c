@@ -111,10 +111,12 @@ int sv_verify(sv_context *ctx, byte *signature, size_t sig_length) {
 }
 
 void free_sv_params(sv_params *params) {
-    if (params->digest)
+    // TODO: EVP_MD_free fails
+    /*if (params->digest)
         EVP_MD_free(params->digest);
     if (params->mgf1_digest)
         EVP_MD_free(params->mgf1_digest);
+    */
     free(params);
 }
 
