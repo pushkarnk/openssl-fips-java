@@ -40,6 +40,7 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Upload logfile
       uses: actions/upload-artifact@v2
+      if: always()
       with:
         name: test.out
         path: ${{ github.workspace }}/build/test/test.out
