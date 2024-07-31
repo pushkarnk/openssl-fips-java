@@ -20,7 +20,7 @@ env:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -40,6 +40,7 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Upload logfile
       uses: actions/upload-artifact@v2
+      if: always()
       with:
         name: test.out
         path: ${{ github.workspace }}/build/test/test.out
