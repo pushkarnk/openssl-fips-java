@@ -172,9 +172,6 @@
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
-                    <excludes>
-                       <exclude>**/*SecureRandomTest.java</exclude>
-                    </excludes>
                 </configuration>
             </plugin>           
         </plugins>

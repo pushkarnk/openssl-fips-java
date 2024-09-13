@@ -34,7 +34,7 @@ tests = {
 }
 
 def run_native_test(name):
-  return os.system(f"build/test/bin/{name} > /dev/null 2>&1")
+  return os.system(f"build/test/bin/{name} >> build/test/test.out 2>&1") 
 
 for test in tests.keys():
   name = tests[test]
