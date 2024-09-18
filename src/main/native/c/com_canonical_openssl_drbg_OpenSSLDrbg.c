@@ -45,23 +45,23 @@ void populate_params(DRBGParams *params, int strength, int prediction_resistance
 JNIEXPORT jlong JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_init
   (JNIEnv *env, jobject this, jstring name, jint strength, jboolean prediction_resistance, jboolean reseeding, jbyteArray personalization_string) {
     const char *name_string = (*env)->GetStringUTFChars(env, name, 0);
-    byte *pstr_bytes = NULL;
+    byte *ps_bytes_native = NULL;
     jsize pstr_length = 0;
 
     if (personalization_string != NULL) { 
         pstr_length = (*env)->GetArrayLength(env, personalization_string);
-        pstr_bytes = (*env)->GetByteArrayElements(env, personalization_string, NULL);
+        byte *pstr_bytes = (*env)->GetByteArrayElements(env, personalization_string, NULL);
+        ps_bytes_native = (byte *)malloc(pstr_length);
+        memcpy(ps_bytes_native, pstr_bytes, pstr_length);
+        (*env)->ReleaseByteArrayElements(env, personalization_string, pstr_bytes, JNI_ABORT);
     }
 
     DRBGParams *params = (DRBGParams *)malloc(sizeof(DRBGParams));
-    populate_params(params, strength, prediction_resistance, reseeding, pstr_bytes, pstr_length, NULL, 0);
+    populate_params(params, strength, prediction_resistance, reseeding, ps_bytes_native, pstr_length, NULL, 0);
 
     DRBG* drbg = create_DRBG_with_params(name_string, NULL, params);
     (*env)->ReleaseStringUTFChars(env, name, name_string);
 
-    if (personalization_string != NULL) {
-        (*env)->ReleaseByteArrayElements(env, personalization_string, pstr_bytes, JNI_ABORT);
-    }
     return (jlong)drbg; 
 }
 
@@ -72,31 +72,29 @@ JNIEXPORT jlong JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_init
  */
 JNIEXPORT void JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_nextBytes0
   (JNIEnv *env, jobject this, jbyteArray out_bytes, jint strength, jboolean prediction_resistance , jbyteArray additional_input) {
-
-    int additional_input_length = 0;
-    jbyte *additional_input_bytes = NULL;
-
+    byte *ai_bytes_native = NULL;
+    jsize additional_input_length = 0;
     jclass clazz = (*env)->GetObjectClass(env, this);
     jfieldID drbg_id = (*env)->GetFieldID(env, clazz, "drbgContext", "J");
     jlong drbg_handle = (*env)->GetLongField(env, this, drbg_id);
 
     int output_bytes_length = (*env)->GetArrayLength(env, out_bytes);
-    byte *output_bytes = (byte *)malloc(sizeof(output_bytes_length));
+    byte *output_bytes = (byte *)malloc(output_bytes_length);
 
     if (additional_input != NULL) {
         additional_input_length = (*env)->GetArrayLength(env, additional_input);
-        additional_input_bytes = (*env)->GetByteArrayElements(env, additional_input, NULL);
+        jbyte *additional_input_bytes = (*env)->GetByteArrayElements(env, additional_input, NULL);
+        ai_bytes_native = (byte*)malloc(additional_input_length);
+        memcpy(ai_bytes_native, additional_input_bytes, additional_input_length);
+        (*env)->ReleaseByteArrayElements(env, additional_input, additional_input_bytes, JNI_ABORT);
     }
     
     DRBGParams *params = (DRBGParams *)malloc(sizeof(DRBGParams));
-    populate_params(params, strength, prediction_resistance, 0, NULL, 0, (byte *)additional_input_bytes, additional_input_length);
+    populate_params(params, strength, prediction_resistance, 0, NULL, 0, ai_bytes_native, additional_input_length);
 
     next_rand_with_params((DRBG *)drbg_handle, output_bytes, output_bytes_length, params);
 
     (*env)->SetByteArrayRegion(env, out_bytes, 0, output_bytes_length, output_bytes);
-    if (additional_input != NULL) {
-        (*env)->ReleaseByteArrayElements(env, additional_input, additional_input_bytes, JNI_ABORT);
-    }
 }
 
 /*
@@ -139,6 +137,7 @@ JNIEXPORT void JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_reseed0
     }
 }
 
+#define MAX_SEED_BYTES 256
 /*
  * Class:     com_canonical_openssl_OpenSSLDrbg
  * Method:    generateSeed0
@@ -151,18 +150,17 @@ JNIEXPORT jbyteArray JNICALL Java_com_canonical_openssl_drbg_OpenSSLDrbg_generat
     jfieldID drbg_id = (*env)->GetFieldID(env, clazz, "drbgContext", "J");
     jlong drbg_handle = (*env)->GetLongField(env, this, drbg_id);
 
-    byte *output = (byte *)malloc(num_bytes);
-
-    if (output == NULL) {
-        return NULL;
+    if (num_bytes > 256) {
+        num_bytes = 256;
     }
+
+    byte output[MAX_SEED_BYTES];
 
     generate_seed((DRBG*)drbg_handle, output, num_bytes);
 
     jbyteArray ret_array = (*env)->NewByteArray(env, num_bytes);
-    (*env)->SetBooleanArrayRegion(env, ret_array, 0, num_bytes, output);
+    (*env)->SetByteArrayRegion(env, ret_array, 0, num_bytes, output);
 
-    free(output);
     return ret_array;
 }
 

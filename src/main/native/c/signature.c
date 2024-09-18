@@ -16,6 +16,7 @@
  */
 #include "signature.h"
 #include "jssl.h"
+#include <openssl/err.h>
 #include <openssl/rsa.h>
 #include <openssl/core_names.h>
 

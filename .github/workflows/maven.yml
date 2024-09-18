@@ -47,4 +47,6 @@ jobs:
       if: always()
       with:
         name: maven-surefire-reports
-        path: ${{ github.workspace }}/target/surefire-reports
+        path: |
+          ${{ github.workspace }}/target/surefire-reports
+          ${{ github.workspace }}/build/test/test.out

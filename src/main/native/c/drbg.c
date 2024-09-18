@@ -16,6 +16,7 @@
  */
 #include <drbg.h>
 #include <stdio.h>
+#include <sys/random.h>
 #include <unistd.h>
 
 DRBGParams NO_PARAMS = { DEFAULT_STRENGTH, 0, 0, NULL, 0, NULL, 0 };
@@ -57,7 +58,7 @@ DRBG* create_DRBG(const char* name, DRBG* parent) {
 DRBG* create_DRBG_with_params(const char* name, DRBG* parent, DRBGParams *drbg_params) {
     EVP_RAND *rand = EVP_RAND_fetch(NULL, name, NULL);
     if (NULL == rand) {
-        fprintf(stderr, "Couldn't allocate EVP_RAND\n");
+        fprintf(stderr, "Couldn't allocate EVP_RAND: %s\n", name);
         return NULL;
     }
     
@@ -93,6 +94,9 @@ DRBG* create_DRBG_with_params(const char* name, DRBG* parent, DRBGParams *drbg_p
 }
 
 int free_DRBGParams(DRBGParams *params) {
+    if (params == NULL) {
+        return 0;
+    }
     FREE_IF_NON_NULL(params->additional_data);
     FREE_IF_NON_NULL(params->personalization_str);
     FREE_IF_NON_NULL(params);
@@ -103,23 +107,10 @@ int free_DRBG(DRBG *generator) {
     if (generator == NULL) {
         return 0;
     }
-
+    free_DRBGParams(generator->params);
+    free_DRBG(generator->parent);
     FREE_IF_NON_NULL(generator->seed);
-    if (generator->context != NULL) {
-        EVP_RAND_CTX_free(generator->context);
-        generator->context = NULL;
-    }
-
-    if (generator->params != NULL) {
-        free_DRBGParams(generator->params);
-        generator->params = NULL;
-    }
-
-    if (generator->parent != NULL) {
-        free_DRBG(generator->parent);
-        generator->parent = NULL;
-    }
-
+    EVP_RAND_CTX_free(generator->context);
     free(generator);
     return 1;
 }
@@ -157,7 +148,7 @@ int generate_seed(DRBG* generator, byte output[], int n_bytes) {
     if (parent != NULL) {
         return next_rand(parent, output, n_bytes);
     } else {
-        return getentropy(output, n_bytes);
+        return getrandom(output, n_bytes, 0);
     }
 }
 
@@ -168,7 +159,7 @@ void reseed(DRBG* generator) {
 void reseed_with_params(DRBG *generator, DRBGParams *params) {
     byte seed[128]; // TODO: what should the default seed size be?
     size_t length = 128;
-    getentropy(seed, length);
+    getrandom(seed, length, 0);
     EVP_RAND_reseed(generator->context, params->prediction_resistance, seed, length, params->additional_data, params->additional_data_length);
 }
 
