@@ -114,6 +114,9 @@
                             <arguments>
                                 <argument>test-solib</argument>
                             </arguments>
+                            <skip>
+                                ${skipGenerateTestResources}
+                            </skip>
                         </configuration>
                     </execution>
                     <execution>
