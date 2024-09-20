@@ -1,5 +1,5 @@
-name: openssl-java-fips
-base: core24
+name: openssl-fips-java
+base: core22
 version: "0.0.1"
 summary: OpenSSL-based Java FIPS Provider
 description: |
@@ -10,19 +10,20 @@ grade: stable
 confinement: strict
 
 parts:
-  openssl-fips-java-jar:
+  openssl-fips-provider-jar:
     plugin: maven
     source: .
     maven-parameters:
       - -DskipTests=true -DskipGenerateTestResources=true -B package --file pom.xml
-
-build-packages:
-  [openjdk-21-jdk, maven, libssl-dev]
+    build-packages:
+      - openjdk-21-jdk
+      - maven
+      - libssl-dev
 
 slots:
-  shared-jar:
+  openssl-fips-provider-jar:
     interface: content
-    content: shared-jar
+    content: openssl-fips-provider-jar
     source:
-     - $SNAP/target
-    write: $SNAP_COMMON/shared-jar
+      read:
+        - $SNAP/jar
