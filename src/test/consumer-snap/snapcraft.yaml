@@ -1,0 +1,67 @@
+name: kem-test 
+base: core22
+version: '1.0'
+summary: Test consumer snap 
+description: |
+  Test consumer snap
+
+grade: stable
+confinement: strict
+
+lint:
+  ignore:
+    - classic 
+    - library
+
+parts:
+  openssl-fips:
+    plugin: autotools
+    source: https://github.com/openssl/openssl
+    source-type: git
+    source-tag: openssl-3.0.2
+    build-packages:
+      - build-essential
+    override-build: |
+      ./Configure enable-fips && make && make install &&  make install_fips
+      mkdir -p  $SNAPCRAFT_PART_INSTALL/usr/local/lib64/ossl-modules
+      mv /usr/local/lib64/ossl-modules/* $SNAPCRAFT_PART_INSTALL/usr/local/lib64/ossl-modules/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/local/ssl/
+      mv /usr/local/ssl/* $SNAPCRAFT_PART_INSTALL/usr/local/ssl/
+      rm $SNAPCRAFT_PART_INSTALL/usr/local/ssl/openssl.cnf
+
+  kem-test:
+    plugin: dump
+    after:
+      - openssl-fips
+    source: .
+    build-packages: 
+      - openjdk-21-jdk
+    override-build: |
+      javac KEMTest.java
+      jar -cf KEMTest.jar ./KEMTest.class 
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      mv KEMTest.jar $SNAPCRAFT_PART_INSTALL/bin/
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/local/ssl/
+      mv ./openssl.cnf $SNAPCRAFT_PART_INSTALL/usr/local/ssl/
+    stage-packages:
+      - openjdk-21-jdk
+      - build-essential
+      - git
+
+
+apps:
+  kem-test:
+    command: /usr/lib/jvm/java-21-openjdk-amd64/bin/java -cp $SNAP/bin/KEMTest.jar:$SNAP/imported-libs/jar/openssl-fips-java-0.0.1.jar KEMTest
+    environment:
+      OPENSSL_MODULES: $SNAP/usr/local/lib64/ossl-modules/
+      OPENSSL_CUSTOM_CONF: $SNAP/usr/local/ssl/openssl.cnf
+      JAVA_HOME: $SNAP/usr/lib/jvm/java-21-openjdk-amd64
+      PATH: $JAVA_HOME/bin:$PATH
+    plugs:
+    - openssl-fips-provider-jar 
+
+plugs:
+  openssl-fips-provider-jar:
+    interface: content
+    content: openssl-fips-provider-jar 
+    target: $SNAP/imported-libs

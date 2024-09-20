@@ -18,6 +18,7 @@
 #include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "jni.h"
 
 /* Global libctx handle. Will be initializaed in JNI_OnLoad */
@@ -64,6 +65,11 @@ OSSL_LIB_CTX* load_openssl_base_provider(const char* conf_file_path) {
 }
 
 int JNI_OnLoad(JavaVM* vm, void *reserved) {
-    global_libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
+    const char *default_cnf = "/usr/local/ssl/openssl.cnf";
+    char *cnf = getenv("OPENSSL_CUSTOM_CONF");
+    if (cnf == NULL) {
+        cnf = default_cnf;
+    }
+    global_libctx = load_openssl_fips_provider(cnf);
     return JNI_VERSION_21;
 }
