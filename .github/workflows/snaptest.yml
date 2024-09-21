@@ -1,0 +1,47 @@
+name: Content snap test 
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install and init lxd
+      run: |
+        sudo lxd init --auto 
+    - name: Install snapcraft
+      run: sudo snap install snapcraft --classic
+    - name: Re-ensure connectivity in LXD containers
+      run: |
+        for ipt in iptables iptables-legacy ip6tables ip6tables-legacy; do \
+          sudo $ipt --flush; \
+          sudo $ipt --flush -t nat; \
+          sudo $ipt --delete-chain; \
+          sudo $ipt --delete-chain -t nat; \
+          sudo $ipt -P FORWARD ACCEPT; \
+          sudo $ipt -P INPUT ACCEPT; \
+          sudo $ipt -P OUTPUT ACCEPT; \
+        done
+        sudo systemctl reload snap.lxd.daemon
+    - name: Build openssl-fips-java snap
+      run: sudo snapcraft
+    - name: Install openssl-fips-java snap
+      run: sudo snap install --dangerous ./openssl-fips-java_0.0.1_amd64.snap
+    - name: Build sample consumer snap
+      run: |
+        cd ${{ github.workspace }}/src/test/consumer-snap
+        sudo snapcraft
+        sudo snap install --dangerous ./kem-test_1.0_amd64.snap 
+        cd ${{ github.workspace }}
+    - name: Connect snaps
+      run: sudo snap connect kem-test:openssl-fips-provider-jar openssl-fips-java:openssl-fips-provider-jar
+    - name: Run kem-test
+      run: kem-test
+    
+      
+     
