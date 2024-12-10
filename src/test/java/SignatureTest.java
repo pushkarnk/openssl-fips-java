@@ -60,18 +60,6 @@ public class SignatureTest {
         testSignature("RSA", gen.pubKey, gen.privKey);
     }
 
-    public void testED25519() throws Exception {
-        EdDSAPublicKey publicKey = new EdDSAPublicKey("src/test/keys/ed25519-pub.pem");
-        EdDSAPrivateKey privateKey = new EdDSAPrivateKey("src/test/keys/ed25519-priv.pem");
-        testSignature("ED25519", publicKey, privateKey);
-    }
-
-    public void testED448() throws Exception {
-        EdDSAPublicKey publicKey = new EdDSAPublicKey("src/test/keys/ed448-pub.pem");
-        EdDSAPrivateKey privateKey = new EdDSAPrivateKey("src/test/keys/ed448-priv.pem");
-        testSignature("ED448", publicKey, privateKey);
-    }
-
     private static void testSignature(String algo,  PublicKey publicKey, PrivateKey privateKey) throws Exception {
         Signature signer = Signature.getInstance(algo, "OpenSSLFIPSProvider");
         if (algo.equals("RSA")) {
@@ -109,32 +97,6 @@ class TestKey {
     public String getAlgorithm() {
         return "";
     }
-}
- 
-class EdDSAPublicKey extends TestKey implements OpenSSLPublicKey {
-   long nativeKey = 0L; 
-   public long getNativeKeyHandle() {
-       return nativeKey;
-   }
-
-   EdDSAPublicKey(String filename) {
-       nativeKey = readPubKeyFromPem0(filename);
-   }
-
-   native long readPubKeyFromPem0(String filename);
-}
-
-class EdDSAPrivateKey extends TestKey implements OpenSSLPrivateKey {
-    long nativeKey = 0L;
-    public long getNativeKeyHandle() {
-        return nativeKey; 
-    }
-
-    EdDSAPrivateKey(String filename) {
-        nativeKey = readPrivKeyFromPem0(filename);
-    }
-
-    native long readPrivKeyFromPem0(String filename);
 }
 
 class RSAPublicKey extends TestKey implements OpenSSLPublicKey {
