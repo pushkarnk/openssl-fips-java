@@ -21,11 +21,11 @@
 #include <stdlib.h>
 
 /*
- * Class:     EdDSAPublicKey
+ * Class:     RSAPublicKey
  * Method:    readPubKeyFromPem0
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_EdDSAPublicKey_readPubKeyFromPem0
+JNIEXPORT jlong JNICALL Java_RSAPublicKey_readPubKeyFromPem0
   (JNIEnv *env, jobject this, jstring filename) {
    OSSL_LIB_CTX *libctx = load_openssl_fips_provider("/usr/local/ssl/openssl.cnf");
    char *c_filename = (char*)(*env)->GetStringUTFChars(env, filename, 0);

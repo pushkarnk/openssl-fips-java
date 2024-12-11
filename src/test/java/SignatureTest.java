@@ -36,6 +36,7 @@ import com.canonical.openssl.provider.OpenSSLFIPSProvider;
 import org.junit.Test;
 import org.junit.BeforeClass;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class SignatureTest {
     static {
@@ -54,41 +55,174 @@ public class SignatureTest {
          + "Etruscan mythology as Apulu.";
 
     @Test
-    public void testRSA() throws Exception {
+    public void testRSABasic() throws Exception {
         RSAKeyPairGenerator gen = new RSAKeyPairGenerator();
         gen.generateKeyPair();
-        testSignature("RSA", gen.pubKey, gen.privKey);
-    }
 
-    public void testED25519() throws Exception {
-        EdDSAPublicKey publicKey = new EdDSAPublicKey("src/test/keys/ed25519-pub.pem");
-        EdDSAPrivateKey privateKey = new EdDSAPrivateKey("src/test/keys/ed25519-priv.pem");
-        testSignature("ED25519", publicKey, privateKey);
-    }
+        PublicKey publicKey = gen.pubKey;
+        PrivateKey privateKey = gen.privKey;
 
-    public void testED448() throws Exception {
-        EdDSAPublicKey publicKey = new EdDSAPublicKey("src/test/keys/ed448-pub.pem");
-        EdDSAPrivateKey privateKey = new EdDSAPrivateKey("src/test/keys/ed448-priv.pem");
-        testSignature("ED448", publicKey, privateKey);
-    }
-
-    private static void testSignature(String algo,  PublicKey publicKey, PrivateKey privateKey) throws Exception {
-        Signature signer = Signature.getInstance(algo, "OpenSSLFIPSProvider");
-        if (algo.equals("RSA")) {
-            signer.setParameter("digest", "SHA-256"); // TODO: why does this work only with SHA-256? 
-        }
+        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        signer.setParameter("digest", "SHA-256"); // TODO: why does this work only with SHA-256? 
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
         signer.update(bytes, 0, bytes.length);
         byte[] sigBytes = signer.sign();
 
-        Signature verifier = Signature.getInstance(algo, "OpenSSLFIPSProvider");
-        if (algo.equals("RSA")) {
-            verifier.setParameter("digest", "SHA-256");
-        }
+        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        verifier.setParameter("digest", "SHA-256");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
-        assertTrue("SignatureTest for " + algo + " failed.", verifier.verify(sigBytes));
+
+        assertTrue("SignatureTest for RSA failed.", verifier.verify(sigBytes));
+    }
+
+    @Test
+    public void testRSAwithMultipleUpdates() throws Exception {
+        PublicKey publicKey = new RSAPublicKey("src/test/keys/rsa16384-pub.pem");
+        PrivateKey privateKey = new RSAPrivateKey("src/test/keys/rsa16384-priv.pem");
+
+        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        signer.setParameter("digest", "SHA-256");
+        signer.initSign(privateKey);
+        byte[] bytes = message.getBytes();
+        signer.update(bytes, 0, bytes.length);
+        signer.update(bytes, 2, bytes.length-2);
+        signer.update(bytes, 3, bytes.length-3); 
+        byte[] sigBytes = signer.sign();
+
+        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        verifier.setParameter("digest", "SHA-256");
+        verifier.initVerify(publicKey);
+        verifier.update(bytes, 0, bytes.length);
+        verifier.update(bytes, 2, bytes.length-2);
+        verifier.update(bytes, 3, bytes.length-3);
+
+        assertTrue("SignatureTest with multiple updates for RSA failed.", verifier.verify(sigBytes));
+    }
+
+    @Test
+    public void testRSAsingleByteUpdates() throws Exception {
+        RSAKeyPairGenerator gen = new RSAKeyPairGenerator();
+        gen.generateKeyPair();
+
+        PublicKey publicKey = gen.pubKey;
+        PrivateKey privateKey = gen.privKey;
+
+        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        signer.setParameter("digest", "SHA-256");
+        signer.initSign(privateKey);
+        byte[] bytes = message.getBytes();
+
+        for (var b : bytes) {
+            signer.update(b);
+        }
+        byte[] sigBytes = signer.sign();
+
+        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        verifier.setParameter("digest", "SHA-256");
+        verifier.initVerify(publicKey);
+        verifier.update(bytes, 0, bytes.length);
+
+        assertTrue("RSA SignatureTest with byte updates failed.", verifier.verify(sigBytes));
+    }
+
+    @Test
+    public void testRSAmultipleByteBufferUpdates() throws Exception {
+        PublicKey publicKey = new RSAPublicKey("src/test/keys/rsa8192-pub.pem");
+        PrivateKey privateKey = new RSAPrivateKey("src/test/keys/rsa8192-priv.pem");
+
+        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        signer.setParameter("digest", "SHA-256");
+        signer.initSign(privateKey);
+        byte[] bytes = message.getBytes();
+        signer.update(ByteBuffer.wrap(message.getBytes()));
+        byte[] sigBytes = signer.sign();
+
+        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        verifier.setParameter("digest", "SHA-256");
+        verifier.initVerify(publicKey);
+        verifier.update(bytes, 0, bytes.length);
+
+        assertTrue("RSA SignatureTest with ByteBuffer updates failed.", verifier.verify(sigBytes));
+    }
+
+    @Test
+    public void testRSAsignNonzeroOffset() throws Exception {
+        PublicKey publicKey = new RSAPublicKey("src/test/keys/rsa4096-pub.pem");
+        PrivateKey privateKey = new RSAPrivateKey("src/test/keys/rsa4096-priv.pem");
+
+        byte[] sigBytes = new byte[612];
+        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        signer.setParameter("digest", "SHA-256");
+        signer.initSign(privateKey);
+        byte[] bytes = message.getBytes();
+        signer.update(ByteBuffer.wrap(message.getBytes()));
+        signer.sign(sigBytes, 100, 512);
+
+        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        verifier.setParameter("digest", "SHA-256");
+        verifier.initVerify(publicKey);
+        verifier.update(bytes, 0, bytes.length);
+
+        assertTrue("RSA SignatureTest with non-zero offset failed.", verifier.verify(sigBytes, 100, 512));
+    }
+
+    @Test
+    public void testRSAtamperedSignature() throws Exception {
+        RSAKeyPairGenerator gen = new RSAKeyPairGenerator();
+        gen.generateKeyPair();
+
+        PublicKey publicKey = gen.pubKey;
+        PrivateKey privateKey = gen.privKey;
+
+        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        signer.setParameter("digest", "SHA-256");
+        signer.initSign(privateKey);
+        byte[] bytes = message.getBytes();
+
+        for (var b : bytes) {
+            signer.update(b);
+        }
+        byte[] sigBytes = signer.sign();
+
+        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        verifier.setParameter("digest", "SHA-256");
+        verifier.initVerify(publicKey);
+        verifier.update(bytes, 0, bytes.length);
+
+        // tamper signature
+        sigBytes[0] += 1;
+
+        assertFalse("RSA SignatureTest with tampered signature failed.", verifier.verify(sigBytes));
+    }
+
+    @Test
+    public void testRSAtamperedContent() throws Exception {
+        RSAKeyPairGenerator gen = new RSAKeyPairGenerator();
+        gen.generateKeyPair();
+
+        PublicKey publicKey = gen.pubKey;
+        PrivateKey privateKey = gen.privKey;
+
+        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        signer.setParameter("digest", "SHA-256");
+        signer.initSign(privateKey);
+        byte[] bytes = message.getBytes();
+
+        for (var b : bytes) {
+            signer.update(b);
+        }
+        byte[] sigBytes = signer.sign();
+
+        // tamper content
+        bytes[0] += 1;
+        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
+        verifier.setParameter("digest", "SHA-256");
+        verifier.initVerify(publicKey);
+        verifier.update(bytes, 0, bytes.length);
+
+        assertFalse("RSA SignatureTest with tampered content failed.", verifier.verify(sigBytes));
     }
 
     @BeforeClass
@@ -110,32 +244,6 @@ class TestKey {
         return "";
     }
 }
- 
-class EdDSAPublicKey extends TestKey implements OpenSSLPublicKey {
-   long nativeKey = 0L; 
-   public long getNativeKeyHandle() {
-       return nativeKey;
-   }
-
-   EdDSAPublicKey(String filename) {
-       nativeKey = readPubKeyFromPem0(filename);
-   }
-
-   native long readPubKeyFromPem0(String filename);
-}
-
-class EdDSAPrivateKey extends TestKey implements OpenSSLPrivateKey {
-    long nativeKey = 0L;
-    public long getNativeKeyHandle() {
-        return nativeKey; 
-    }
-
-    EdDSAPrivateKey(String filename) {
-        nativeKey = readPrivKeyFromPem0(filename);
-    }
-
-    native long readPrivKeyFromPem0(String filename);
-}
 
 class RSAPublicKey extends TestKey implements OpenSSLPublicKey {
     long nativeKey = 0L;
@@ -144,9 +252,15 @@ class RSAPublicKey extends TestKey implements OpenSSLPublicKey {
         this.nativeKey = nativeKey;
     }
 
+    public RSAPublicKey(String filename) {
+        this.nativeKey = readPubKeyFromPem0(filename);
+    }
+
     public long getNativeKeyHandle() {
         return nativeKey; 
     }
+
+    native long readPubKeyFromPem0(String filename);
 }
 
 class RSAPrivateKey extends TestKey implements OpenSSLPrivateKey {
@@ -156,9 +270,15 @@ class RSAPrivateKey extends TestKey implements OpenSSLPrivateKey {
         this.nativeKey = nativeKey;
     }
 
+    public RSAPrivateKey(String filename) {
+        this.nativeKey = readPrivKeyFromPem0(filename);
+    }
+
     public long getNativeKeyHandle() {
         return nativeKey;
     }
+
+    native long readPrivKeyFromPem0(String filename);
 }
 
 class RSAKeyPairGenerator {
