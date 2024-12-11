@@ -108,7 +108,7 @@ public class ProviderSanityTest {
 
     @Test
     public void testSignatures() {
-        test(Signature.class, "RSA", SignatureRSA.class, "sigSpi");
+        test(Signature.class, "RSAwithSHA256", SignatureRSAwithSHA256.class, "sigSpi");
         //test(Signature.class, "ED448", SignatureED448.class, "sigSpi");
         //test(Signature.class, "ED25519", SignatureED25519.class, "sigSpi");
     }

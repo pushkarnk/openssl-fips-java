@@ -62,15 +62,13 @@ public class SignatureTest {
         PublicKey publicKey = gen.pubKey;
         PrivateKey privateKey = gen.privKey;
 
-        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        signer.setParameter("digest", "SHA-256"); // TODO: why does this work only with SHA-256? 
+        Signature signer = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
         signer.update(bytes, 0, bytes.length);
         byte[] sigBytes = signer.sign();
 
-        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        verifier.setParameter("digest", "SHA-256");
+        Signature verifier = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
 
@@ -82,8 +80,7 @@ public class SignatureTest {
         PublicKey publicKey = new RSAPublicKey("src/test/keys/rsa16384-pub.pem");
         PrivateKey privateKey = new RSAPrivateKey("src/test/keys/rsa16384-priv.pem");
 
-        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        signer.setParameter("digest", "SHA-256");
+        Signature signer = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
         signer.update(bytes, 0, bytes.length);
@@ -91,8 +88,7 @@ public class SignatureTest {
         signer.update(bytes, 3, bytes.length-3); 
         byte[] sigBytes = signer.sign();
 
-        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        verifier.setParameter("digest", "SHA-256");
+        Signature verifier = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
         verifier.update(bytes, 2, bytes.length-2);
@@ -109,8 +105,7 @@ public class SignatureTest {
         PublicKey publicKey = gen.pubKey;
         PrivateKey privateKey = gen.privKey;
 
-        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        signer.setParameter("digest", "SHA-256");
+        Signature signer = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
 
@@ -119,8 +114,7 @@ public class SignatureTest {
         }
         byte[] sigBytes = signer.sign();
 
-        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        verifier.setParameter("digest", "SHA-256");
+        Signature verifier = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
 
@@ -132,15 +126,13 @@ public class SignatureTest {
         PublicKey publicKey = new RSAPublicKey("src/test/keys/rsa8192-pub.pem");
         PrivateKey privateKey = new RSAPrivateKey("src/test/keys/rsa8192-priv.pem");
 
-        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        signer.setParameter("digest", "SHA-256");
+        Signature signer = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
         signer.update(ByteBuffer.wrap(message.getBytes()));
         byte[] sigBytes = signer.sign();
 
-        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        verifier.setParameter("digest", "SHA-256");
+        Signature verifier = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
 
@@ -153,15 +145,13 @@ public class SignatureTest {
         PrivateKey privateKey = new RSAPrivateKey("src/test/keys/rsa4096-priv.pem");
 
         byte[] sigBytes = new byte[612];
-        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        signer.setParameter("digest", "SHA-256");
+        Signature signer = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
         signer.update(ByteBuffer.wrap(message.getBytes()));
         signer.sign(sigBytes, 100, 512);
 
-        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        verifier.setParameter("digest", "SHA-256");
+        Signature verifier = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
 
@@ -176,8 +166,7 @@ public class SignatureTest {
         PublicKey publicKey = gen.pubKey;
         PrivateKey privateKey = gen.privKey;
 
-        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        signer.setParameter("digest", "SHA-256");
+        Signature signer = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
 
@@ -186,8 +175,7 @@ public class SignatureTest {
         }
         byte[] sigBytes = signer.sign();
 
-        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        verifier.setParameter("digest", "SHA-256");
+        Signature verifier = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
 
@@ -205,8 +193,7 @@ public class SignatureTest {
         PublicKey publicKey = gen.pubKey;
         PrivateKey privateKey = gen.privKey;
 
-        Signature signer = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        signer.setParameter("digest", "SHA-256");
+        Signature signer = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         signer.initSign(privateKey);
         byte[] bytes = message.getBytes();
 
@@ -217,8 +204,7 @@ public class SignatureTest {
 
         // tamper content
         bytes[0] += 1;
-        Signature verifier = Signature.getInstance("RSA", "OpenSSLFIPSProvider");
-        verifier.setParameter("digest", "SHA-256");
+        Signature verifier = Signature.getInstance("RSAwithSHA256", "OpenSSLFIPSProvider");
         verifier.initVerify(publicKey);
         verifier.update(bytes, 0, bytes.length);
 

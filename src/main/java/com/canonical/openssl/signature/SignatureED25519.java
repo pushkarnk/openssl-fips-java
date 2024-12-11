@@ -17,6 +17,10 @@
 package com.canonical.openssl.signature;
 
 public final class SignatureED25519 extends OpenSSLSignature {
+    public SignatureED25519() {
+        super(null);
+    }
+
     protected String getSignatureName() {
         return "ED25519";
     }
