@@ -16,8 +16,13 @@
  */
 package com.canonical.openssl.signature;
 
-public final class SignatureRSA extends OpenSSLSignature {
+public final class SignatureRSAwithSHA256 extends OpenSSLSignature {
+
+    public SignatureRSAwithSHA256() {
+        super(new OpenSSLSignature.Params("SHA-256", -1, OpenSSLSignature.Padding.NONE, null));
+    }
+
     protected String getSignatureName() {
-        return "RSA";
+        return "RSAwithSHA256";
     }
 }

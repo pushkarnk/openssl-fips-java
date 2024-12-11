@@ -17,6 +17,10 @@
 package com.canonical.openssl.signature;
 
 public final class SignatureED448 extends OpenSSLSignature {
+    public SignatureED448() {
+        super(null);
+    }
+
     protected String getSignatureName() {
         return "ED448";
     }

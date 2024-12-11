@@ -61,9 +61,9 @@ public abstract class OpenSSLSignature extends SignatureSpi {
 
     private Params params = new Params(null, -1, Padding.NONE, null);;
 
-    enum Padding { NONE, PSS };
+    protected static enum Padding { NONE, PSS };
 
-    class Params {
+    protected static class Params {
 
         static final int NO_PADDING = 0;
         static final int PSS_PADDING = 1;
@@ -95,6 +95,10 @@ public abstract class OpenSSLSignature extends SignatureSpi {
         public int getPadding() {
             return padding;
         }
+    }
+
+    protected OpenSSLSignature(Params params) {
+        this.params = params;
     }
 
     protected abstract String getSignatureName();

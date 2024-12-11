@@ -56,7 +56,7 @@ public final class OpenSSLFIPSProvider extends Provider {
         put("MessageDigest.MDSHA512", "com.canonical.openssl.md.MDSHA512");
 
         // Signatures
-        put("Signature.RSA", "com.canonical.openssl.signature.SignatureRSA");
+        put("Signature.RSAwithSHA256", "com.canonical.openssl.signature.SignatureRSAwithSHA256");
         // The openssl FIPS provider for Ubuntu Pro does not have support for ED448 and ED25519.
         // There is lack of clarity over the FIPS approval status of these algorithms.
         // put("Signature.ED448", "com.canonical.openssl.signature.SignatureED448");
